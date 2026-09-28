@@ -3,7 +3,7 @@
 미취학 자녀와 외출하는 가족이 오늘 실제로 갈 수 있는 장소를 빠르게 고르도록 돕는 모바일 우선 추천 서비스입니다.
 
 - 새 Sites 이름: 5DGZ
-- 새 Sites 주소 식별자: `odigaji-5dgz` (아직 배포 전)
+- 새 Sites 주소 식별자: `odigaji-5dgz` — https://odigaji-5dgz.leeyesd.chatgpt.site (소유자 비공개)
 - 디자인 B 경로: `/b`
 - 다른 컴퓨터에서 이어서 작업하기: [5DGZ_HANDOFF.md](./5DGZ_HANDOFF.md)
 - 장소 선별 기준: [docs/curation-rubric.md](./docs/curation-rubric.md)

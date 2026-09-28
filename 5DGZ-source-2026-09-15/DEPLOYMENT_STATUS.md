@@ -14,3 +14,14 @@
 - TypeScript 독립 검사는 원본에서 빠진 Cloudflare runtime 타입 정의로 실패. 빌드는 성공하나 타입 정의 보완 필요.
 - 중복 판별용 주소 정규화 및 DB 조회 조건은 기존 코드 유지. 중복 레코드는 공개되지 않음.
 - 기존 legacy status는 호환용으로 남아 있음. 중복 큐는 0건일 때 숨김. 기존 운영 DB의 duplicate 건수는 확인되지 않음.
+
+## 2026-09-28 배포 완료
+
+- URL: https://odigaji-5dgz.leeyesd.chatgpt.site
+- 접근: 소유자 비공개
+- 배포: appgdep_6ab9e52806b881919c15bc9183614800 (succeeded)
+- Sites 소스 커밋: 84620029994eaa2776c9aeaa8c0fc6ff97e9ed9d
+- GitHub main에 이름 및 상태 관리 변경 반영 완료.
+- 빌드, 린트, 상태 규칙/이전 데이터 보존 테스트 통과. 로컬 API에서 생성·승인·거절·주소 중복·공개 필터와 A/B 렌더링 통과.
+- 새 운영 DB에는 기존 장소 데이터를 가져오지 않았음.
+- GitHub main 업로드가 Sites를 자동 배포하는 연결은 없음. 현재는 Sites 도구로 별도 배포함.

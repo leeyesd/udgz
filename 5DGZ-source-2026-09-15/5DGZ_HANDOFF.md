@@ -21,7 +21,7 @@
 ## 2. 현재 공개 서비스
 
 - 새 사이트 이름: 5DGZ
-- 새 주소 식별자: `odigaji-5dgz` (아직 배포 전)
+- 새 주소 식별자: `odigaji-5dgz` — https://odigaji-5dgz.leeyesd.chatgpt.site (소유자 비공개)
 - A안: `/`
 - B안: `/b`
 - 어드민: `/admin/{ADMIN_ACCESS_KEY}`
