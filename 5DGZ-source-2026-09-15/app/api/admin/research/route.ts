@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         include: ["web_search_call.action.sources"],
         max_tool_calls: 4,
         input: `한국의 가족 나들이 장소 '${placeName}'를 조사해 주세요. 공식 홈페이지, 공공기관, 공식 예약 페이지를 최우선으로 사용하세요. 현재 확인할 수 없는 정보는 추측하지 말고 '확인 필요' 또는 빈 문자열로 표시하세요. 가격 정보가 없다는 이유만으로 무료라고 판단하지 마세요. 주소는 전체주소와 시/도, 시/군/구, 읍/면/동으로 분리하세요. 공개 카드 문구는 사실에 근거해 간결하게 작성하세요.`,
-        text: { format: { type: "json_schema", name: "udgz_place_research", strict: true, schema: schema() } },
+        text: { format: { type: "json_schema", name: "5dgz_place_research", strict: true, schema: schema() } },
       }),
     });
     if (!response.ok) throw new Error(`API 조사 실패 (${response.status})`);

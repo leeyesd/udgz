@@ -92,7 +92,7 @@ export const places: Place[] = [
     coreEnvironment: "실내·야외",
     score: 97,
     ageHint: "유아부터",
-    summary: "이국적인 공간감과 아이 체험이 함께 살아있는 UDGZ형 장소",
+    summary: "이국적인 공간감과 아이 체험이 함께 살아있는 5DGZ형 장소",
     reasons: ["부모가 만족하는 감도", "아이의 분명한 체험", "사진과 기억이 남는 희소성"],
   },
   {

@@ -125,7 +125,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
     <main className={styles.page}>
       <header className={styles.header}>
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- avoids a Vinext client runtime duplication in this route */}
-        <a href="/" className={styles.brand}><span>🍆</span> 어디가지</a>
+        <a href="/" className={styles.brand}><span>🍆</span> 오디가지</a>
         <div><span className={styles.privateBadge}>SECRET LINK</span><b>장소 DB</b></div>
       </header>
 

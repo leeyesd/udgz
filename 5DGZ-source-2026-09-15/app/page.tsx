@@ -83,8 +83,8 @@ export default function Home() {
     return (
       <main className="results-page">
         <header className="topbar">
-          <button className="brand brand-button" onClick={() => setShowResults(false)} aria-label="어디가지 처음으로">
-            <span className="brand-mark">🍆</span><span>어디가지</span>
+          <button className="brand brand-button" onClick={() => setShowResults(false)} aria-label="오디가지 처음으로">
+            <span className="brand-mark">🍆</span><span>오디가지</span>
           </button>
           <button className="channel-button" onClick={notifyChannel}>공연/행사/할인 알림 받기</button>
         </header>
@@ -111,7 +111,7 @@ export default function Home() {
                 <article className="place-card">
                   <div className={`place-visual tone-${index % 4}`}>
                     <span className="rank">{index + 1}</span>
-                    {index < 3 && <span className="pick-label">UDGZ PICK</span>}
+                    {index < 3 && <span className="pick-label">5DGZ PICK</span>}
                     <span className="category-icon">{categoryIcons[place.category]}</span>
                     <small>{place.coreEnvironment}</small>
                   </div>
@@ -152,13 +152,13 @@ export default function Home() {
   return (
     <main>
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="어디가지 홈"><span className="brand-mark">🍆</span><span>어디가지</span></a>
+        <a className="brand" href="#top" aria-label="오디가지 홈"><span className="brand-mark">🍆</span><span>오디가지</span></a>
         <button className="channel-button" onClick={notifyChannel}>공연/행사/할인 알림 받기</button>
       </header>
 
       <section className="hero" id="top">
         <div className="eyebrow"><span /> 직접 엄선한 장소, 계속 업데이트 중</div>
-        <h1>오늘<br /><strong>어디가지?</strong></h1>
+        <h1>오늘<br /><strong>오디가지?</strong></h1>
         <p className="hero-copy">SNS에서 좋아보이는 곳들,<br />막상 가려고하면 다시 찾아봐야했죠.<br />당장 갈 수 있는 곳 중에서<br />고르고 바로 출발하세요!</p>
 
         <div className="finder-card one-page-form">
@@ -185,7 +185,7 @@ export default function Home() {
             <div className="time-options compact-time">{[["30분 이내", "오늘은 가까운 곳"], ["30분 이상", "좋은 곳이면 멀어도 괜찮아요"]].map(([time, copy]) => <button key={time} className={travelTime === time ? "selected" : ""} onClick={() => setTravelTime(time)}><span className="time-radio"/><span><b>{time}</b><small>{copy}</small></span></button>)}</div>
           </section>
 
-          <button className="primary-button recommend-button" disabled={!location.trim() || selectedAges.length === 0 || loadingPlaces} onClick={getRecommendations}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 어디가지? 추천받기"}</button>
+          <button className="primary-button recommend-button" disabled={!location.trim() || selectedAges.length === 0 || loadingPlaces} onClick={getRecommendations}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
           {selectedAges.length === 0 && <p className="selection-help">아이 나이를 한 개 이상 골라주세요.</p>}
         </div>
 

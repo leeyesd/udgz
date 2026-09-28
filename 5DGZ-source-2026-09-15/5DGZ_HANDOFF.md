@@ -1,26 +1,27 @@
-# UDGZ 어디가지 — 작업 인수인계
+# 5DGZ 오디가지 — 작업 인수인계
 
 마지막 정리일: 2026-09-15 (Asia/Seoul)
 
-이 문서는 다른 컴퓨터의 Codex에서 UDGZ 개발을 이어가기 위한 기준 문서다. 새 작업을 시작할 때 아래처럼 요청하면 된다.
+이 문서는 다른 컴퓨터의 Codex에서 5DGZ 개발을 이어가기 위한 기준 문서다. 새 작업을 시작할 때 아래처럼 요청하면 된다.
 
-> 이 저장소의 `UDGZ_HANDOFF.md`와 `AGENTS.md`를 먼저 읽고, 현재 코드와 Git 상태를 확인한 뒤 이어서 작업해줘. 비밀값은 출력하거나 커밋하지 마.
+> 이 저장소의 `5DGZ_HANDOFF.md`와 `AGENTS.md`를 먼저 읽고, 현재 코드와 Git 상태를 확인한 뒤 이어서 작업해줘. 비밀값은 출력하거나 커밋하지 마.
 
 ## 1. 제품 목표
 
-UDGZ(어디가지)는 미취학 자녀와 외출하는 부모가 여러 정보를 다시 검색하는 시간을 줄이고, 지금 가족이 실제로 갈 수 있는 장소를 빠르게 결정하도록 돕는 모바일 우선 웹 서비스다.
+5DGZ(오디가지)는 미취학 자녀와 외출하는 부모가 여러 정보를 다시 검색하는 시간을 줄이고, 지금 가족이 실제로 갈 수 있는 장소를 빠르게 결정하도록 돕는 모바일 우선 웹 서비스다.
 
 - 핵심 성공 경험: 서비스 진입 후 15분 안에 장소 결정
 - 핵심 행동: 추천 결과의 `티켓예매` 또는 `길찾기` 클릭
 - 초기 목표: MAU 1,000명, 이용자 100명 중 10명 핵심 행동
 - 운영 지역: 서울 및 경기남부 중심, SNS에서 화제가 된 장소는 지역 외 개별 추가
-- 브랜드: UDGZ / 어디가지, 가지(🍆), 진한 보라색
+- 브랜드: 5DGZ / 오디가지, 가지(🍆), 진한 보라색
 - 제작자 표기: 육아하는 디자이너 션디네집
 - 인스타그램: https://www.instagram.com/seandy.zip
 
 ## 2. 현재 공개 서비스
 
-- 공개 주소: https://udgz.riankr.chatgpt.site
+- 새 사이트 이름: 5DGZ
+- 새 주소 식별자: `odigaji-5dgz` (아직 배포 전)
 - A안: `/`
 - B안: `/b`
 - 어드민: `/admin/{ADMIN_ACCESS_KEY}`
@@ -36,7 +37,7 @@ UDGZ(어디가지)는 미취학 자녀와 외출하는 부모가 여러 정보�
 - 나이 0~7세 복수 선택
 - 이동거리 의도: `30분 이내`, `30분 이상`
 - 사용자 테마 4종: `실내`, `야외`, `특별한 체험`, `감성적 휴식`
-- 추천 결과 상위 3곳에만 UDGZ Pick 표시
+- 추천 결과 상위 3곳에만 5DGZ Pick 표시
 - 길찾기 및 SNS 후기 검색 링크 제공
 - DB의 공개 장소와 코드 내 엄선 장소를 함께 추천
 
@@ -133,7 +134,7 @@ git diff --cached
 3. GitHub가 보여주는 주소를 사용해 아래 명령을 실행한다.
 
 ```bash
-git remote add origin https://github.com/본인계정/udgz.git
+git remote add origin https://github.com/leeyesd/udgz.git
 git push -u origin main
 ```
 
@@ -142,7 +143,7 @@ git push -u origin main
 ### 노트북에서 할 일
 
 ```bash
-git clone https://github.com/본인계정/udgz.git
+git clone https://github.com/leeyesd/udgz.git
 cd udgz
 npm install
 npm run dev

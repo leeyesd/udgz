@@ -14,7 +14,7 @@ const moods: { value: Mood; title: string; description: string; icon: string }[]
 ];
 
 function Logo() {
-  return <span className={styles.logo}><span aria-hidden="true">🍆</span> 어디가지</span>;
+  return <span className={styles.logo}><span aria-hidden="true">🍆</span> 오디가지</span>;
 }
 
 export default function VariantB() {
@@ -64,7 +64,7 @@ export default function VariantB() {
         <section className={styles.resultsShell}>
           <button className={styles.backButton} onClick={() => setResults(false)}>← 조건 수정</button>
           <div className={styles.resultsHeader}>
-            <span className={styles.overline}>UDGZ TOP 3</span>
+            <span className={styles.overline}>5DGZ TOP 3</span>
             <h1>오늘의 세 곳을<br />골라봤어요.</h1>
             <p>{location} 근처 · {selectedAges.map(age => `${age}세`).join(", ")} · {distance}</p>
           </div>
@@ -77,7 +77,7 @@ export default function VariantB() {
                 <article className={styles.resultCard}>
                   <div className={`${styles.resultArt} ${styles[`art${index + 1}`]}`}>
                     <span className={styles.resultRank}>0{index + 1}</span>
-                    <span className={styles.pick}>UDGZ PICK</span>
+                    <span className={styles.pick}>5DGZ PICK</span>
                     <span className={styles.environment}>{place.coreEnvironment}</span>
                   </div>
                   <div className={styles.resultBody}>
@@ -160,7 +160,7 @@ export default function VariantB() {
             <div className={styles.distanceGrid}>{["30분 이내", "30분 이상"].map(value => <button type="button" key={value} aria-pressed={distance === value} className={distance === value ? styles.distanceSelected : styles.distance} onClick={() => setDistance(value)}><span className={styles.radio} /><b>{value}</b><small>{value === "30분 이내" ? "가볍게 가까운 곳" : "좋다면 멀어도 괜찮아요"}</small></button>)}</div>
           </fieldset>
 
-          <button className={styles.mobileSubmit} disabled={!canRecommend || loadingPlaces}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 어디가지? 추천받기"}</button>
+          <button className={styles.mobileSubmit} disabled={!canRecommend || loadingPlaces}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
         </form>
 
         <aside className={styles.summaryCard}>
@@ -171,7 +171,7 @@ export default function VariantB() {
             <div><dt>기분</dt><dd>{mood}</dd></div>
             <div><dt>이동</dt><dd>{distance}</dd></div>
           </dl>
-          <button disabled={!canRecommend || loadingPlaces} onClick={recommend}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 어디가지? 추천받기"}</button>
+          <button disabled={!canRecommend || loadingPlaces} onClick={recommend}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
           <small>조건에 맞는 장소 중 상위 3곳을 먼저 보여드려요.</small>
         </aside>
       </section>
