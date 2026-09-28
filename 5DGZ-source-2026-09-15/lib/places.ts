@@ -16,6 +16,8 @@ export type Place = {
   ticketCandidate?: boolean;
   affiliateUrl?: string;
   fullAddress?: string;
+  imageUrl?: string;
+  prices?: import("./place-record").PriceRow[];
   details?: { label: string; value: string }[];
 };
 

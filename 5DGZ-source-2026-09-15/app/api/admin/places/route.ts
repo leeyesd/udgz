@@ -1,3 +1,4 @@
+import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, count, desc, eq, ne, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { ensureDatabase } from "../../../../db/ensure";
@@ -19,8 +20,8 @@ function cleanPlace(input: Partial<PlaceRecord>): PlaceRecord {
   return {
     ...base,
     ...input,
-    name: input.name?.trim() ?? "",
-    branchName: input.branchName?.trim() ?? "",
+    name: mergedPlaceName(input.name ?? "", input.branchName ?? ""),
+    branchName: "",
     fullAddress: input.fullAddress?.trim() ?? "",
     province: input.province?.trim() ?? "",
     city: input.city?.trim() ?? "",
@@ -28,7 +29,7 @@ function cleanPlace(input: Partial<PlaceRecord>): PlaceRecord {
     themes: normalizeThemes(input.themes ?? []),
     reviewer: input.reviewer?.trim() ?? "",
     officialSources: (input.officialSources ?? []).filter((source) => source.url.trim()),
-    prices: input.prices?.length ? input.prices : base.prices,
+    prices: (input.prices?.length ? input.prices : base.prices).map(normalizePrice),
     reasons: (input.reasons ?? []).map((reason) => reason.trim()).filter(Boolean),
     score: Math.max(0, Math.min(100, Number(input.score ?? 80))),
   };

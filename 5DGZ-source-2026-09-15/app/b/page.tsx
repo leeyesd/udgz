@@ -20,6 +20,7 @@ function Logo() {
 }
 
 export default function VariantB() {
+  const [visitDate, setVisitDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
   const [location, setLocation] = useState("");
   const [selectedAges, setSelectedAges] = useState([2]);
   const [mood, setMood] = useState<Mood>("실내");
@@ -28,11 +29,11 @@ export default function VariantB() {
   const [toast, setToast] = useState("");
   const [availablePlaces, setAvailablePlaces] = useState(places);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
-  const canRecommend = location.trim().length > 0 && selectedAges.length > 0;
+  const canRecommend = Boolean(visitDate) && location.trim().length > 0 && selectedAges.length > 0;
 
   const recommendations = useMemo(() => [...availablePlaces].sort((a, b) => {
-    const aScore = a.score + (a.moods.includes(mood) ? 20 : 0);
-    const bScore = b.score + (b.moods.includes(mood) ? 20 : 0);
+    const aScore = Object.values(a.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (a.moods.includes(mood) ? 20 : 0);
+    const bScore = Object.values(b.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (b.moods.includes(mood) ? 20 : 0);
     return bScore - aScore;
   }).slice(0, 3), [mood, availablePlaces]);
 
@@ -71,13 +72,14 @@ export default function VariantB() {
             <p>{location} 근처 · {selectedAges.map(age => `${age}세`).join(", ")} · {distance}</p>
           </div>
 
-          <div className={styles.resultNotice}><span>i</span><p><b>감도 + 육아편의 + 경험희소성</b> 상위 3곳을 먼저 보여드려요!</p></div>
+          <div className={styles.resultNotice}><span>i</span><p><b>감도 + 체력빼기 + 경험희소성</b> 상위 3곳을 먼저 보여드려요!</p></div>
 
           <div className={styles.resultGrid}>
             {recommendations.map((place, index) => (
               <Fragment key={place.id}>
                 <article className={styles.resultCard}>
                   <div className={`${styles.resultArt} ${styles[`art${index + 1}`]}`}>
+                    {place.imageUrl && <img className="place-photo" src={place.imageUrl} alt={place.name} />}
                     <span className={styles.resultRank}>0{index + 1}</span>
                     <span className={styles.pick}>5DGZ PICK</span>
                     <span className={styles.environment}>{place.coreEnvironment}</span>
@@ -86,10 +88,10 @@ export default function VariantB() {
                     <span className={styles.placeMeta}>{place.region} · {place.category}</span>
                     <h2>{place.name}</h2>
                     <p>{place.summary}</p>
-                    <ul>{place.reasons.slice(0, 2).map(reason => <li key={reason}>{reason}</li>)}</ul>
+                    <p>연령 · {place.ageHint || "찾는중.."}</p>
                     <PlaceTags scores={place.tagScores} />
-                    <PlaceDetails details={place.details} />
-                    {place.caution && <p className={styles.caution}>확인 · {place.caution}</p>}
+                    <PlaceDetails details={place.details} prices={place.prices} date={visitDate} />
+                    <p className={styles.caution}>확인 · {place.caution || "찾는중.."}</p>
                     <div className={styles.resultActions}>
                       <a className={styles.routeButton} href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer">길찾기 ↗</a>
                       <a className={styles.reviewButton} href={`https://search.naver.com/search.naver?query=${encodeURIComponent(`${place.name} 아이와`)}`} target="_blank" rel="noreferrer">SNS 후기 보기</a>
@@ -131,7 +133,7 @@ export default function VariantB() {
       <section className={styles.workspace}>
         <form className={styles.formCard} onSubmit={event => { event.preventDefault(); recommend(); }}>
           <div className={styles.formIntro}>
-            <span>4가지만 알려주세요</span>
+            <span>방문 조건을 알려주세요</span>
             <p>선택은 저장되지 않아요.</p>
           </div>
 
@@ -164,6 +166,7 @@ export default function VariantB() {
             <div className={styles.distanceGrid}>{["30분 이내", "30분 이상"].map(value => <button type="button" key={value} aria-pressed={distance === value} className={distance === value ? styles.distanceSelected : styles.distance} onClick={() => setDistance(value)}><span className={styles.radio} /><b>{value}</b><small>{value === "30분 이내" ? "가볍게 가까운 곳" : "좋다면 멀어도 괜찮아요"}</small></button>)}</div>
           </fieldset>
 
+          <label className="visit-date">방문 날짜<input type="date" value={visitDate} required onChange={e => setVisitDate(e.target.value)} /><small>월~금 평일 · 토·일 주말 요금. 공휴일 요금은 이용 정보를 확인해주세요.</small></label>
           <button className={styles.mobileSubmit} disabled={!canRecommend || loadingPlaces}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
         </form>
 

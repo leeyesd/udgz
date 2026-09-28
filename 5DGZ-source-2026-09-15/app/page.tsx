@@ -34,6 +34,7 @@ function CreatorFooter() {
 }
 
 export default function Home() {
+  const [visitDate, setVisitDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
   const [location, setLocation] = useState("");
   const [selectedAges, setSelectedAges] = useState([2]);
   const [mood, setMood] = useState<Mood>("실내");
@@ -48,8 +49,8 @@ export default function Home() {
 
   const recommendations = useMemo(() => {
     return [...availablePlaces].sort((a, b) => {
-      const aFit = a.score + (a.moods.includes(mood) ? 18 : 0);
-      const bFit = b.score + (b.moods.includes(mood) ? 18 : 0);
+      const aFit = Object.values(a.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (a.moods.includes(mood) ? 18 : 0);
+      const bFit = Object.values(b.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (b.moods.includes(mood) ? 18 : 0);
       return bFit - aFit;
     });
   }, [mood, availablePlaces]);
@@ -104,7 +105,7 @@ export default function Home() {
 
           <div className="beta-note">
             <span>i</span>
-            <p><b>감도+육아편의+경험희소성 상위 3곳을 먼저 보여드려요!</b></p>
+            <p><b>감도+체력빼기+경험희소성 상위 3곳을 먼저 보여드려요!</b></p>
           </div>
 
           <div className="place-list">
@@ -114,6 +115,7 @@ export default function Home() {
                   <div className={`place-visual tone-${index % 4}`}>
                     <span className="rank">{index + 1}</span>
                     {index < 3 && <span className="pick-label">5DGZ PICK</span>}
+                    {place.imageUrl && <img className="place-photo" src={place.imageUrl} alt={place.name} />}
                     <span className="category-icon">{categoryIcons[place.category]}</span>
                     <small>{place.coreEnvironment}</small>
                   </div>
@@ -123,16 +125,14 @@ export default function Home() {
                     </div>
                     <h2>{place.name}</h2>
                     <p className="place-summary">{place.summary}</p>
-                    <div className="reason-row">
-                      {place.reasons.map(reason => <span key={reason}>✓ {reason}</span>)}
-                    </div>
+                    <p className="place-age">연령 · {place.ageHint || "찾는중.."}</p>
                     <PlaceTags scores={place.tagScores} />
-                    <PlaceDetails details={place.details} />
-                    {place.caution && <p className="caution">확인할 점 · {place.caution}</p>}
+                    <PlaceDetails details={place.details} prices={place.prices} date={visitDate} />
+                    <p className="caution">확인할 점 · {place.caution || "찾는중.."}</p>
                     <div className="place-actions">
                       <a className="action primary-action" href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer" onClick={() => trackEvent("route_click", { place: place.name, rank: index + 1 })}>길찾기 <span>↗</span></a>
                       <a className="action secondary-action" href={`https://search.naver.com/search.naver?query=${encodeURIComponent(`${place.name} 아이와`)}`} target="_blank" rel="noreferrer" onClick={() => trackEvent("review_search_click", { place: place.name, rank: index + 1 })}>SNS 후기 보기</a>
-                      {place.ticketCandidate && <button className="ticket-chip" onClick={() => trackEvent("ticket_interest_click", { place: place.name })}>티켓 연결 후보</button>}
+
                     </div>
                   </div>
                 </article>
@@ -189,7 +189,9 @@ export default function Home() {
             <div className="time-options compact-time">{[["30분 이내", "오늘은 가까운 곳"], ["30분 이상", "좋은 곳이면 멀어도 괜찮아요"]].map(([time, copy]) => <button key={time} className={travelTime === time ? "selected" : ""} onClick={() => setTravelTime(time)}><span className="time-radio"/><span><b>{time}</b><small>{copy}</small></span></button>)}</div>
           </section>
 
-          <button className="primary-button recommend-button" disabled={!location.trim() || selectedAges.length === 0 || loadingPlaces} onClick={getRecommendations}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
+          <label className="visit-date">방문 날짜<input type="date" value={visitDate} required onChange={e => setVisitDate(e.target.value)} /><small>월~금은 평일, 토·일은 주말 요금입니다. 공휴일 요금은 이용 정보를 확인해주세요.</small></label>
+
+          <button className="primary-button recommend-button" disabled={!visitDate || !location.trim() || selectedAges.length === 0 || loadingPlaces} onClick={getRecommendations}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
           {selectedAges.length === 0 && <p className="selection-help">아이 나이를 한 개 이상 골라주세요.</p>}
         </div>
 

@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     const location = new URL(request.url).searchParams.get("location")?.trim() ?? "";
     const key = normalize(location);
     const db = getDb();
-    const rows = await db.select().from(places).where(eq(places.isPublic, true)).orderBy(desc(places.score), desc(places.updatedAt)).limit(500);
-    const matched = key ? rows.filter((row) => normalize(`${row.province}${row.city}${row.district}${row.fullAddress}`).includes(key) || key.includes(normalize(row.city)) || key.includes(normalize(row.district))) : rows;
+    const rows = await db.select().from(places).where(eq(places.isPublic, true)).orderBy(desc(places.updatedAt)).limit(500);
+    const matched = key ? rows.filter((row) => normalize(`${row.province}${row.city}${row.fullAddress}`).includes(key) || (Boolean(row.city) && key.includes(normalize(row.city)))) : rows;
     const hidden = await db.select({ name: places.name, branchName: places.branchName }).from(places).where(eq(places.isPublic, false));
     const hiddenNames = new Set(hidden.map(row => `${row.name}${row.branchName}`.replace(/\s/g, "")));
     const excludedFallbackIds = curatedFallback.filter(place => hiddenNames.has(place.name.replace(/\s/g, ""))).map(place => place.id);

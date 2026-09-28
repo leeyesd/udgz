@@ -367,3 +367,10 @@ h1 strong { color: var(--purple); font-weight: 950; }
 .place-tag { padding:6px 10px; border-radius:6px; font-size:14px; font-weight:600; }
 .place-tag.strong { background:#64358c; color:#fff; }
 .place-tag.dimmed { background:#eeeef1; color:#65656e; }
+
+.visit-date { display: grid; gap: 8px; margin: 20px 0; font-size: 16px; }
+.visit-date input { padding: 12px; border: 1px solid #ccc; border-radius: 10px; background: white; color: #242026; }
+.visit-date small { font-size: 14px; color: #625c66; }
+.visit-price, .place-age { font-size: 14px; line-height: 1.7; margin: 12px 0; }
+.place-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.place-visual > span, .place-visual > small { z-index: 1; }

@@ -6,7 +6,7 @@ export const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
 export type DayHours = { closed: boolean; open: string; close: string; note: string };
 export type WeeklyHours = Record<(typeof DAYS)[number], DayHours>;
-export type PriceRow = { label: string; minAge: string; maxAge: string; price: string; free: boolean; note: string };
+export type PriceRow = { label: string; minAge: string; maxAge: string; price: string; free: boolean; note: string; weekdayPrice?: string; weekendPrice?: string };
 export type OfficialSource = { label: string; url: string };
 
 export type PlaceRecord = {

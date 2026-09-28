@@ -1,7 +1,6 @@
 import { placeDetails, displayValue } from "./place-display";
 import type { PlaceRecord } from "./place-record";
 import { places as curatedFallback, type Mood, type Place } from "./places";
-import { normalizeThemes } from "./place-record";
 
 type DbPlace = Partial<PlaceRecord> & {
   id: number; name: string; branchName: string; category: Place["category"]; fullAddress: string;
@@ -24,11 +23,11 @@ function toPublicPlace(row: DbPlace): Place {
   return {
     id: `db-${row.id}`,
     name: `${row.name}${row.branchName ? ` ${row.branchName}` : ""}`,
-    region: [row.city, row.district].filter(Boolean).join(" "),
+    region: [row.province, row.city].filter(Boolean).join(" "),
     category: row.category,
-    moods: normalizeThemes(row.themes) as Mood[],
+    moods: [...(row.environment === "혼합" ? ["실내", "야외"] : row.environment === "실내" || row.environment === "야외" ? [row.environment] : []), ...((row.rarityScore ?? 0) >= 4 ? ["특별한 체험"] : []), ...((row.aestheticScore ?? 0) >= 4 ? ["감성적 휴식"] : [])] as Mood[],
     coreEnvironment: row.environment === "혼합" ? "실내·야외" : displayValue(row.environment) as Place["coreEnvironment"],
-    score: row.score,
+    score: (row.aestheticScore ?? 0) + (row.activityScore ?? 0) + (row.rarityScore ?? 0),
     ageHint: row.ageHint,
     summary: displayValue(row.summary),
     reasons: row.reasons,
@@ -37,6 +36,8 @@ function toPublicPlace(row: DbPlace): Place {
     affiliateUrl: row.affiliateUrl || undefined,
     fullAddress: row.fullAddress,
     details: placeDetails(row),
+    prices: row.prices,
+    imageUrl: row.imageUrl,
     tagScores: { aestheticScore: row.aestheticScore, activityScore: row.activityScore, rarityScore: row.rarityScore },
   };
 }

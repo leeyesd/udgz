@@ -1,3 +1,4 @@
+import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { ensureDatabase } from "../../../../db/ensure";
@@ -9,7 +10,7 @@ const LIMIT = 10;
 
 function schema() {
   const day = { type: "object", additionalProperties: false, properties: { day: { type: "string" }, closed: { type: "boolean" }, open: { type: "string" }, close: { type: "string" }, note: { type: "string" } }, required: ["day", "closed", "open", "close", "note"] };
-  const price = { type: "object", additionalProperties: false, properties: { label: { type: "string" }, minAge: { type: "string" }, maxAge: { type: "string" }, price: { type: "string" }, free: { type: "boolean" }, note: { type: "string" } }, required: ["label", "minAge", "maxAge", "price", "free", "note"] };
+  const price = { type: "object", additionalProperties: false, properties: { label: { type: "string" }, minAge: { type: "string" }, maxAge: { type: "string" }, price: { type: "string" }, weekdayPrice: { type: "string" }, weekendPrice: { type: "string" }, free: { type: "boolean" }, note: { type: "string" } }, required: ["label", "minAge", "maxAge", "price", "weekdayPrice", "weekendPrice", "free", "note"] };
   const source = { type: "object", additionalProperties: false, properties: { label: { type: "string" }, url: { type: "string" } }, required: ["label", "url"] };
   return {
     type: "object", additionalProperties: false,
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
         tools: [{ type: "web_search" }],
         include: ["web_search_call.action.sources"],
         max_tool_calls: 4,
-        input: `한국의 가족 나들이 장소 '${placeName}'를 조사해 주세요. 공식 홈페이지, 공공기관, 공식 예약 페이지를 최우선으로 사용하세요. 현재 확인할 수 없는 정보는 추측하지 말고 '확인 필요' 또는 빈 문자열로 표시하세요. 가격 정보가 없다는 이유만으로 무료라고 판단하지 마세요. 주소는 전체주소와 시/도, 시/군/구, 읍/면/동으로 분리하세요. 공개 카드 문구는 사실에 근거해 간결하게 작성하세요.`,
+        input: `한국의 가족 나들이 장소 '${placeName}'를 조사해 주세요. 공식 홈페이지, 공공기관, 공식 예약 페이지를 최우선으로 사용하세요. 현재 확인할 수 없는 정보는 추측하지 말고 '확인 필요' 또는 빈 문자열로 표시하세요. 가격 정보가 없다는 이유만으로 무료라고 판단하지 마세요. 지점명은 name에 포함하고 branchName과 district는 빈 문자열로 두세요. 주소는 전체주소와 시/도, 시/군/구로 분리하세요. 평일과 주말 가격은 weekdayPrice와 weekendPrice에 각각 저장하고 무료는 0, 미확인은 빈 문자열로 두세요. 공휴일, 시간대 할인, 적용 기간은 note에 기록하세요. imageUrl과 reasons는 비워두세요. 공개 카드 문구는 사실에 근거해 간결하게 작성하세요.`,
         text: { format: { type: "json_schema", name: "5dgz_place_research", strict: true, schema: schema() } },
       }),
     });
@@ -67,6 +68,8 @@ export async function POST(request: Request) {
     const base = emptyPlace(researched.name || placeName);
     const item: PlaceRecord = {
       ...base, ...researched,
+      name: mergedPlaceName(researched.name || placeName, researched.branchName || ""), branchName: "",
+      prices: (researched.prices ?? base.prices).map(normalizePrice),
       weeklyHours: Array.isArray(researched.weeklyHours) ? toHours(researched.weeklyHours, base.weeklyHours) : base.weeklyHours,
       themes: [], reviewer: "", score: 80, ticketCandidate: false, affiliateUrl: "",
       aiResearched: true, lastVerifiedAt: new Date().toISOString().slice(0, 10),

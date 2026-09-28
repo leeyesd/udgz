@@ -10,8 +10,11 @@ export function placeDetails(place: Partial<PlaceRecord>) {
       const h = place.weeklyHours?.[day];
       return `${day} ${h?.closed ? "휴무" : h?.open && h?.close ? `${h.open}–${h.close}` : "찾는중.."}`;
     }).join(" · ") },
-    { label: "연령별 입장료", value: place.prices?.length ? place.prices.map(row => `${row.label || "연령"}${row.minAge || row.maxAge ? ` (${row.minAge || "미만"}–${row.maxAge || "이상"}세)` : ""}: ${row.free ? "무료" : displayValue(row.price)}`).join(" · ") : "찾는중.." },
+
     { label: "주차", value: displayValue(place.parkingType) },
+    { label: "주차 비용", value: displayValue(place.parkingFee) },
+    { label: "수유실", value: displayValue(place.nursingRoom) },
+    { label: "기저귀갈이대", value: displayValue(place.changingTable) },
     { label: "주차 지원시간", value: place.parkingType === "주차 불가" ? "해당 없음" : displayValue(place.parkingSupport) },
     { label: "환경", value: displayValue(place.environment) },
     { label: "카테고리", value: displayValue(place.category) },

@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 
-type RuntimeEnv = { ADMIN_ACCESS_KEY?: string; OPENAI_API_KEY?: string; DB?: D1Database };
+type RuntimeEnv = { ADMIN_ACCESS_KEY?: string; OPENAI_API_KEY?: string; DB?: D1Database; PLACE_IMAGES?: R2Bucket };
 
 export function runtimeEnv() {
   return env as unknown as RuntimeEnv;
