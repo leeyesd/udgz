@@ -15,6 +15,9 @@ export type Place = {
   caution?: string;
   ticketCandidate?: boolean;
   affiliateUrl?: string;
+  reservationRequired?: boolean | null;
+  reservationUrl?: string;
+  snsUrl?: string;
   fullAddress?: string;
   imageUrl?: string;
   prices?: import("./place-record").PriceRow[];

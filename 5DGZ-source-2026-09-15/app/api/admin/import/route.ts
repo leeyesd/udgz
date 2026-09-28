@@ -1,3 +1,4 @@
+import { normalizeLinks } from "../../../../lib/place-links";
 import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../../../../db";
@@ -49,12 +50,13 @@ export async function POST(request: Request) {
     const now = new Date().toISOString();
     const db = getDb();
     const statements = items.map((item) => db.insert(places).values({
+      ...normalizeLinks({ ...item, name: mergedPlaceName(item.name, item.branchName ?? "") }),
       name: mergedPlaceName(item.name, item.branchName ?? ""), branchName: "", category: "미지정",
       fullAddress: item.fullAddress.trim(), addressKey: item.addressKey ?? "",
       province: item.province ?? "", city: item.city ?? "", district: item.district ?? "",
       weeklyHours: item.weeklyHours, holidayHours: item.holidayHours ?? "확인 필요",
       reservationRequired: item.reservationRequired ?? null, reservationOpenRule: item.reservationOpenRule ?? "",
-      reservationUrl: item.reservationUrl ?? "", ageRestriction: item.ageRestriction ?? "확인 필요",
+      ageRestriction: item.ageRestriction ?? "확인 필요",
       prices: (item.prices ?? []).map(normalizePrice), timeSurcharge: item.timeSurcharge ?? "", themes: [], environment: "미지정",
       parkingType: item.parkingType ?? "확인 필요", parkingFee: item.parkingFee ?? "", parkingSupport: item.parkingSupport ?? "",
       nursingRoom: item.nursingRoom ?? "확인 필요", changingTable: item.changingTable ?? "확인 필요",

@@ -20,6 +20,5 @@ export function placeDetails(place: Partial<PlaceRecord>) {
     { label: "카테고리", value: displayValue(place.category) },
     { label: "예약 필요", value: place.reservationRequired === true ? "필요" : place.reservationRequired === false ? "불필요" : "찾는중.." },
     { label: "예약 오픈", value: place.reservationRequired === false ? "해당 없음" : displayValue(place.reservationOpenRule) },
-    { label: "예약 링크", value: place.reservationRequired === false ? "해당 없음" : displayValue(place.reservationUrl) },
   ];
 }

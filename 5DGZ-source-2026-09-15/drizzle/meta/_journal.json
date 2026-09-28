@@ -15,6 +15,13 @@
       "when": 1790569910261,
       "tag": "0001_sour_lilith",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790577646266,
+      "tag": "0002_military_nomad",
+      "breakpoints": true
     }
   ]
 }

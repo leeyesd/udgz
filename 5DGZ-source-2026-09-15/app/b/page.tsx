@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceActions from "../PlaceActions";
 import PlaceTags from "../PlaceTags";
 import PlaceDetails from "../PlaceDetails";
 import { Fragment, useMemo, useState } from "react";
@@ -93,8 +94,7 @@ export default function VariantB() {
                     <PlaceDetails details={place.details} prices={place.prices} date={visitDate} />
                     <p className={styles.caution}>확인 · {place.caution || "찾는중.."}</p>
                     <div className={styles.resultActions}>
-                      <a className={styles.routeButton} href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer">길찾기 ↗</a>
-                      <a className={styles.reviewButton} href={`https://search.naver.com/search.naver?query=${encodeURIComponent(`${place.name} 아이와`)}`} target="_blank" rel="noreferrer">SNS 후기 보기</a>
+                      <PlaceActions place={place} primaryClass={styles.routeButton} secondaryClass={styles.reviewButton} />
                     </div>
                   </div>
                 </article>

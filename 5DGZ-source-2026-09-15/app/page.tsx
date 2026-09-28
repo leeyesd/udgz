@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceActions from "./PlaceActions";
 import PlaceTags from "./PlaceTags";
 import PlaceDetails from "./PlaceDetails";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
@@ -130,8 +131,7 @@ export default function Home() {
                     <PlaceDetails details={place.details} prices={place.prices} date={visitDate} />
                     <p className="caution">확인할 점 · {place.caution || "찾는중.."}</p>
                     <div className="place-actions">
-                      <a className="action primary-action" href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer" onClick={() => trackEvent("route_click", { place: place.name, rank: index + 1 })}>길찾기 <span>↗</span></a>
-                      <a className="action secondary-action" href={`https://search.naver.com/search.naver?query=${encodeURIComponent(`${place.name} 아이와`)}`} target="_blank" rel="noreferrer" onClick={() => trackEvent("review_search_click", { place: place.name, rank: index + 1 })}>SNS 후기 보기</a>
+                      <PlaceActions place={place} primaryClass="action primary-action" secondaryClass="action secondary-action" />
 
                     </div>
                   </div>

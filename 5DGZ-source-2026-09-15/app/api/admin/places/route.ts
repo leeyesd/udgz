@@ -1,3 +1,4 @@
+import { normalizeLinks, safeLink } from "../../../../lib/place-links";
 import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, count, desc, eq, ne, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
@@ -64,6 +65,10 @@ export async function POST(request: Request) {
     const item = cleanPlace(payload.place ?? {});
     if (!item.name) return Response.json({ error: "필수입력값을 채워주세요.", missing: [{ key: "name", label: "장소명" }]  }, { status: 400 });
 
+    for (const key of ["reservationUrl", "affiliateUrl", "snsUrl"] as const) {
+      if (item[key]?.trim() && !safeLink(item[key])) return Response.json({ error: "링크는 http:// 또는 https:// 주소로 입력해주세요." }, { status: 400 });
+    }
+    Object.assign(item, normalizeLinks(item));
     const db = getDb();
     const addressKey = normalizeAddress(item.fullAddress);
     try { validateTagScores(item as unknown as Record<string, unknown>); }
@@ -109,7 +114,7 @@ export async function POST(request: Request) {
       nursingRoom: item.nursingRoom, changingTable: item.changingTable, officialSources: item.officialSources,
       imageUrl: item.imageUrl, imageSourceUrl: item.imageSourceUrl, summary: item.summary,
       reasons: item.reasons, caution: item.caution, ageHint: item.ageHint, score: item.score,
-      ticketCandidate: item.ticketCandidate, affiliateUrl: item.affiliateUrl, status, ...state,
+      ticketCandidate: item.ticketCandidate, affiliateUrl: item.affiliateUrl, snsUrl: item.snsUrl ?? "", status, ...state,
       duplicateOfId: duplicate[0]?.id ?? null, reviewer: item.reviewer,
       aiResearched: Boolean(item.aiResearched), lastVerifiedAt: item.lastVerifiedAt,
       updatedAt: new Date().toISOString(),

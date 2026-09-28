@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CATEGORIES, DAYS, emptyPlace, type PlaceRecord } from "../../../lib/place-record";
 import { TAG_FIELDS, TAG_LABELS } from "../../../lib/place-tags";
+import { normalizeLinks } from "../../../lib/place-links";
 import { normalizePrice } from "../../../lib/place-pricing";
 import styles from "./admin.module.css";
 
@@ -139,7 +140,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
   };
 
   const update = <K extends keyof PlaceRecord>(key: K, value: PlaceRecord[K]) => {
-    setDraft((current) => current && current.id === draft?.id ? { ...current, [key]: value } : current);
+    setDraft((current) => current && current.id === draft?.id ? (() => { const next = { ...current, [key]: value }; return key === "name" || key === "reservationRequired" ? { ...next, ...normalizeLinks(next) } : next; })() : current);
     setMissingFields((current) => current.filter((item) => item !== key));
   };
 
@@ -221,7 +222,10 @@ function PlaceEditor({ draft, update, onSave, saving, missingFields, adminToken 
         <Field label="전체주소" required invalid={missing.has("fullAddress")}><input id="field-fullAddress" {...field("fullAddress")} placeholder="도로명 주소 전체" /></Field>
         <div className={styles.grid3}><Field label="시/도" required invalid={missing.has("province")}><input id="field-province" {...field("province")} placeholder="경기도" /></Field><Field label="시/군/구" required invalid={missing.has("city")}><input id="field-city" {...field("city")} placeholder="수원시" /></Field></div>
         <div className={styles.grid2}><Field label="예약 필요"><select value={draft.reservationRequired == null ? "unknown" : draft.reservationRequired ? "yes" : "no"} onChange={(e) => update("reservationRequired", e.target.value === "unknown" ? null : e.target.value === "yes")}><option value="unknown">찾는중..</option><option value="no">아니오</option><option value="yes">예</option></select></Field><Field label="예약 오픈 규칙"><input {...field("reservationOpenRule")} placeholder="매달 1일 오전 10시" /></Field></div>
-        <Field label="예약 링크"><input type="url" {...field("reservationUrl")} placeholder="https://" /></Field>
+        <Field label="예약 링크"><input type="url" {...field("reservationUrl")} readOnly={draft.reservationRequired === false} placeholder="https://" /></Field>
+        {draft.reservationRequired === false && <p>예약이 필요 없으면 장소명 + 아이랑 검색 링크를 자동 입력합니다.</p>}
+        <Field label="제휴 링크"><input type="url" {...field("affiliateUrl")} placeholder="직접 입력 · 입력하면 예약 링크보다 우선 표시" /></Field>
+        <Field label="SNS 링크"><input type="url" {...field("snsUrl")} placeholder="SNS 후기 링크 · 비우면 네이버 블로그 검색" /></Field>
       </FormSection>
 
       <FormSection title="운영시간" description="요일별 운영시간과 공휴일 운영 정보를 저장해요.">

@@ -1,0 +1,1 @@
+ALTER TABLE `places` ADD `sns_url` text DEFAULT '' NOT NULL;

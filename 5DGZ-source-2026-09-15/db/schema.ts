@@ -43,6 +43,7 @@ export const places = sqliteTable("places", {
   score: integer("score").notNull().default(80),
   ticketCandidate: integer("ticket_candidate", { mode: "boolean" }).notNull().default(false),
   affiliateUrl: text("affiliate_url").notNull().default(""),
+  snsUrl: text("sns_url").notNull().default(""),
   researchStatus: text("research_status").notNull().default("hold"),
   reviewStatus: text("review_status").notNull().default("pending"),
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),

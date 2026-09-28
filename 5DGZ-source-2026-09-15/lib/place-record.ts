@@ -49,6 +49,7 @@ export type PlaceRecord = {
   score: number;
   ticketCandidate: boolean;
   affiliateUrl: string;
+  snsUrl?: string;
   researchStatus?: ResearchStatus;
   reviewStatus?: ReviewStatus;
   isPublic?: boolean;

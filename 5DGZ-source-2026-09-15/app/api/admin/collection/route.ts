@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         if (input.referenceKey) ids.set(input.referenceKey, existing.id);
         results.push({ name, id: existing.id, result: "duplicate_skipped" }); continue;
       }
-      const response = await savePlace(new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify({ action: "save", place: { ...input, id: undefined, parentPlaceId, aiResearched: true, reviewStatus: "pending", reviewer: "" } }) }));
+      const response = await savePlace(new Request(request.url, { method: "POST", headers: request.headers, body: JSON.stringify({ action: "save", place: { ...input, id: undefined, affiliateUrl: "", parentPlaceId, aiResearched: true, reviewStatus: "pending", reviewer: "" } }) }));
       const body = await response.json() as { error?: string; place?: PlaceRecord };
       if (!response.ok || !body.place?.id) throw new Error(body.error ?? "등록 실패");
       if (input.referenceKey) ids.set(input.referenceKey, body.place.id);

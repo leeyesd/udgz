@@ -1,3 +1,4 @@
+import { normalizeLinks } from "../../../../lib/place-links";
 import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
       themes: [], reviewer: "", score: 80, ticketCandidate: false, affiliateUrl: "",
       aiResearched: true, lastVerifiedAt: new Date().toISOString().slice(0, 10),
     };
+    Object.assign(item, normalizeLinks(item));
     const addressKey = normalizeAddress(item.fullAddress);
     const duplicate = addressKey ? await db.select({ id: places.id }).from(places).where(and(eq(places.addressKey, addressKey), isNull(places.parentPlaceId))).orderBy(desc(places.id)).limit(1) : [];
     const status = duplicate.length ? "duplicate" : "pending";
