@@ -1,10 +1,16 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import type { OfficialSource, PriceRow, WeeklyHours } from "../lib/place-record";
 
 export const places = sqliteTable("places", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  parentPlaceId: integer("parent_place_id"),
+  nameKey: text("name_key").notNull().default(""),
+  aestheticScore: integer("aesthetic_score"),
+  activityScore: integer("activity_score"),
+  rarityScore: integer("rarity_score"),
+  tagEvidence: text("tag_evidence", { mode: "json" }).$type<Record<string, string>>().notNull().default({}),
   branchName: text("branch_name").notNull().default(""),
   category: text("category").notNull().default("체험"),
   fullAddress: text("full_address").notNull().default(""),
@@ -48,6 +54,7 @@ export const places = sqliteTable("places", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
+  uniqueIndex("idx_places_parent_name").on(table.parentPlaceId, table.nameKey),
   index("idx_places_public").on(table.isPublic),
   index("idx_places_status").on(table.status),
   index("idx_places_address_key").on(table.addressKey),

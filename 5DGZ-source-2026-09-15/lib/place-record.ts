@@ -1,7 +1,7 @@
 import type { ResearchStatus, ReviewStatus } from "./place-status";
 
 export const THEMES = ["실내", "야외", "특별한 체험", "감성적 휴식"] as const;
-export const CATEGORIES = ["미지정", "문화", "체험", "카페", "자연", "테마파크", "식당", "공공"] as const;
+export const CATEGORIES = ["미지정", "자연", "카페/식당", "놀이공간", "테마파크", "체험", "문화"] as const;
 export const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
 export type DayHours = { closed: boolean; open: string; close: string; note: string };
@@ -11,6 +11,11 @@ export type OfficialSource = { label: string; url: string };
 
 export type PlaceRecord = {
   id?: number;
+  parentPlaceId?: number | null;
+  aestheticScore?: number | null;
+  activityScore?: number | null;
+  rarityScore?: number | null;
+  tagEvidence?: Record<string, string>;
   name: string;
   branchName: string;
   category: string;

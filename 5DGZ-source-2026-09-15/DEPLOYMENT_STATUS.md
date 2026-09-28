@@ -25,3 +25,13 @@
 - 빌드, 린트, 상태 규칙/이전 데이터 보존 테스트 통과. 로컬 API에서 생성·승인·거절·주소 중복·공개 필터와 A/B 렌더링 통과.
 - 새 운영 DB에는 기존 장소 데이터를 가져오지 않았음.
 - GitHub main 업로드가 Sites를 자동 배포하는 연결은 없음. 현재는 Sites 도구로 별도 배포함.
+
+## 2026-09-28 장소 수집 v1.2
+- Sites source: `7ebdbaa1fcffcdae15e7b181990be395555bbc94`
+- Deployment: `appgdep_6ab9f132a7588191b5946d9c22737b29` (succeeded)
+- URL: https://odigaji-5dgz.leeyesd.chatgpt.site
+- 세 점수 저장·카드 표시, 동일 주소의 부모/자식 체험시설, 직원 수집 JSON 등록.
+- 후보 30곳 검토: 26곳 등록, 주소 중복 1곳 건너뜀, 보류 2곳, 상업 키즈카페 1곳 제외.
+- 신규 26곳 모두 pending. review_required 2곳 공개, incomplete 24곳 비공개.
+- 사진은 점수 근거로만 확인·출처 저장; 사이트에 재게시하지 않음.
+- 반복 실행·Slack 전송·상시 자동 조사 워커는 아직 활성화하지 않음.

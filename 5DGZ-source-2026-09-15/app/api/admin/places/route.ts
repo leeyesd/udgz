@@ -1,10 +1,11 @@
-import { and, count, desc, eq, ne } from "drizzle-orm";
+import { and, count, desc, eq, ne, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { ensureDatabase } from "../../../../db/ensure";
 import { places, researchRuns } from "../../../../db/schema";
 import { isAdminRequest, unauthorized } from "../../../../lib/admin-access";
 import { emptyPlace, normalizeAddress, normalizeThemes, type PlaceRecord } from "../../../../lib/place-record";
 
+import { validateTagScores, placeNameKey } from "../../../../lib/place-tags";
 import { resolvePlaceStatus } from "../../../../lib/place-status";
 
 
@@ -38,6 +39,13 @@ export async function GET(request: Request) {
   try {
     await ensureDatabase();
     const db = getDb();
+    const url = new URL(request.url);
+    if (url.searchParams.get("lookup") === "1") {
+      const address = normalizeAddress(url.searchParams.get("address") ?? "");
+      if (!address) return Response.json({ places: [] });
+      const rows = await db.select({ id: places.id, name: places.name, fullAddress: places.fullAddress }).from(places).where(eq(places.addressKey, address)).limit(30);
+      return Response.json({ places: rows });
+    }
     const rows = (await db.select().from(places).orderBy(desc(places.updatedAt), desc(places.id)).limit(300))
       .map((place) => ({ ...place, themes: normalizeThemes(place.themes) }));
     const [{ value: researchCount }] = await db.select({ value: count() }).from(researchRuns);
@@ -57,11 +65,22 @@ export async function POST(request: Request) {
 
     const db = getDb();
     const addressKey = normalizeAddress(item.fullAddress);
-    const duplicate = addressKey
-      ? await db.select({ id: places.id, name: places.name }).from(places).where(
-          item.id ? and(eq(places.addressKey, addressKey), ne(places.id, item.id)) : eq(places.addressKey, addressKey)
-        ).limit(1)
+    try { validateTagScores(item as unknown as Record<string, unknown>); }
+    catch (error) { return Response.json({ error: String(error) }, { status: 400 }); }
+    const parentPlaceId = item.parentPlaceId ?? null;
+    if (parentPlaceId !== null) {
+      if (!Number.isSafeInteger(parentPlaceId) || parentPlaceId <= 0 || parentPlaceId === item.id) return Response.json({ error: "상위 장소를 확인해주세요." }, { status: 400 });
+      const [parent] = await db.select({ id: places.id, parentPlaceId: places.parentPlaceId }).from(places).where(eq(places.id, parentPlaceId)).limit(1);
+      if (!parent || parent.parentPlaceId !== null) return Response.json({ error: "등록된 일반 장소를 상위 장소로 선택해주세요." }, { status: 400 });
+    }
+    const nameKey = placeNameKey(item.name);
+    const match = parentPlaceId !== null
+      ? and(eq(places.parentPlaceId, parentPlaceId), eq(places.nameKey, nameKey))
+      : and(eq(places.addressKey, addressKey), isNull(places.parentPlaceId));
+    const duplicate = (parentPlaceId !== null || addressKey)
+      ? await db.select({ id: places.id, name: places.name }).from(places).where(item.id ? and(match, ne(places.id, item.id)) : match).limit(1)
       : [];
+    if (parentPlaceId !== null && duplicate.length) return Response.json({ error: "같은 상위 장소에 이미 등록된 체험 공간입니다.", duplicate: duplicate[0] }, { status: 409 });
 
     if (payload.action && !["save", "approve", "reject"].includes(payload.action)) return Response.json({ error: "지원하지 않는 작업입니다." }, { status: 400 });
     const existing = item.id ? (await db.select().from(places).where(eq(places.id, item.id)).limit(1))[0] : undefined;
@@ -77,6 +96,8 @@ export async function POST(request: Request) {
     const status = duplicate.length ? "duplicate" : state.isPublic ? "published" : "pending";
 
     const values = {
+      parentPlaceId, nameKey, aestheticScore: item.aestheticScore ?? null, activityScore: item.activityScore ?? null,
+      rarityScore: item.rarityScore ?? null, tagEvidence: item.tagEvidence ?? {},
       name: item.name, branchName: item.branchName, category: item.category, fullAddress: item.fullAddress,
       addressKey, province: item.province, city: item.city, district: item.district,
       weeklyHours: item.weeklyHours, holidayHours: item.holidayHours,

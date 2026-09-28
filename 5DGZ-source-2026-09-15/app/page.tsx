@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceTags from "./PlaceTags";
 import PlaceDetails from "./PlaceDetails";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Mood, places } from "../lib/places";
@@ -12,7 +13,7 @@ const moods: { value: Mood; description: string; icon: string }[] = [
   { value: "감성적 휴식", description: "부모도 기분 좋게 쉬어가기", icon: "♧" },
 ];
 
-const categoryIcons = { 문화: "◫", 체험: "✦", 카페: "☕", 자연: "♧", 테마파크: "★", 식당: "◇", 공공: "▣" };
+const categoryIcons = { 문화: "◫", 체험: "✦", "카페/식당": "☕", 자연: "♧", 테마파크: "★", 놀이공간: "▣" };
 
 type EventData = Record<string, string | number | boolean>;
 
@@ -125,6 +126,7 @@ export default function Home() {
                     <div className="reason-row">
                       {place.reasons.map(reason => <span key={reason}>✓ {reason}</span>)}
                     </div>
+                    <PlaceTags scores={place.tagScores} />
                     <PlaceDetails details={place.details} />
                     {place.caution && <p className="caution">확인할 점 · {place.caution}</p>}
                     <div className="place-actions">

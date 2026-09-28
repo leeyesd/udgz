@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { ensureDatabase } from "../../../../db/ensure";
 import { places, researchRuns } from "../../../../db/schema";
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       aiResearched: true, lastVerifiedAt: new Date().toISOString().slice(0, 10),
     };
     const addressKey = normalizeAddress(item.fullAddress);
-    const duplicate = addressKey ? await db.select({ id: places.id }).from(places).where(eq(places.addressKey, addressKey)).orderBy(desc(places.id)).limit(1) : [];
+    const duplicate = addressKey ? await db.select({ id: places.id }).from(places).where(and(eq(places.addressKey, addressKey), isNull(places.parentPlaceId))).orderBy(desc(places.id)).limit(1) : [];
     const status = duplicate.length ? "duplicate" : "pending";
     const [saved] = await db.insert(places).values({
       ...item, id: undefined, addressKey, status, researchStatus: "hold", reviewStatus: "pending", isPublic: false, duplicateOfId: duplicate[0]?.id ?? null,

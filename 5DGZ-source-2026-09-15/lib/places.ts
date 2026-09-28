@@ -4,9 +4,10 @@ export type Place = {
   id: string;
   name: string;
   region: string;
-  category: "문화" | "체험" | "카페" | "자연" | "테마파크" | "식당" | "공공";
+  category: "문화" | "체험" | "카페/식당" | "자연" | "테마파크" | "놀이공간";
   moods: Mood[];
   coreEnvironment: "실내" | "야외" | "실내·야외" | "찾는중..";
+  tagScores?: { aestheticScore?: number | null; activityScore?: number | null; rarityScore?: number | null };
   score: number;
   ageHint: string;
   summary: string;
@@ -37,7 +38,7 @@ export const places: Place[] = [
     id: "movement-lab-uiwang",
     name: "무브먼트랩 의왕",
     region: "의왕",
-    category: "카페",
+    category: "카페/식당",
     moods: ["감성적 휴식", "야외"],
     coreEnvironment: "실내·야외",
     score: 91,
@@ -76,7 +77,7 @@ export const places: Place[] = [
     id: "mayfield-hotel-cafe",
     name: "메이필드호텔 카페",
     region: "서울 강서",
-    category: "카페",
+    category: "카페/식당",
     moods: ["감성적 휴식", "야외"],
     coreEnvironment: "실내·야외",
     score: 95,
@@ -165,7 +166,7 @@ export const places: Place[] = [
     id: "slow-us",
     name: "슬로우어스",
     region: "서울 잠실",
-    category: "카페",
+    category: "카페/식당",
     moods: ["실내", "특별한 체험", "감성적 휴식"],
     coreEnvironment: "실내",
     score: 91,

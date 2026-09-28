@@ -8,6 +8,13 @@
       "when": 1790566784328,
       "tag": "0000_silky_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790569910261,
+      "tag": "0001_sour_lilith",
+      "breakpoints": true
     }
   ]
 }

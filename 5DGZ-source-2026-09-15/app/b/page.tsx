@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceTags from "../PlaceTags";
 import PlaceDetails from "../PlaceDetails";
 import { Fragment, useMemo, useState } from "react";
 import { Mood, places } from "../../lib/places";
@@ -86,6 +87,7 @@ export default function VariantB() {
                     <h2>{place.name}</h2>
                     <p>{place.summary}</p>
                     <ul>{place.reasons.slice(0, 2).map(reason => <li key={reason}>{reason}</li>)}</ul>
+                    <PlaceTags scores={place.tagScores} />
                     <PlaceDetails details={place.details} />
                     {place.caution && <p className={styles.caution}>확인 · {place.caution}</p>}
                     <div className={styles.resultActions}>

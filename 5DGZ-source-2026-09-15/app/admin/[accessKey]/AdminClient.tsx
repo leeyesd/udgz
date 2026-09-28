@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CATEGORIES, DAYS, THEMES, emptyPlace, type PlaceRecord } from "../../../lib/place-record";
+import { TAG_FIELDS, TAG_LABELS } from "../../../lib/place-tags";
 import styles from "./admin.module.css";
 
 type SearchLink = { label: string; url: string };
@@ -9,6 +10,8 @@ type SearchLink = { label: string; url: string };
 export default function AdminClient({ adminToken }: { adminToken: string }) {
   const [places, setPlaces] = useState<PlaceRecord[]>([]);
   const [researchCount, setResearchCount] = useState(0);
+  const [collectionText, setCollectionText] = useState("");
+  const [collectionBusy, setCollectionBusy] = useState(false);
   const [placeName, setPlaceName] = useState("");
   const [tab, setTab] = useState("hold");
   const [draft, setDraft] = useState<PlaceRecord | null>(null);
@@ -116,6 +119,19 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
     }
   };
 
+  const importCollection = async () => {
+    setCollectionBusy(true); setMessage("");
+    try {
+      const candidates = JSON.parse(collectionText);
+      const response = await request("/api/admin/collection", { method: "POST", body: JSON.stringify({ candidates }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      setMessage(data.results.map((r: { name: string; result: string; error?: string }) => `${r.name}: ${r.result === "created" ? "등록 완료" : r.result === "duplicate_skipped" ? "기존 장소 유지" : r.error}`).join(" / "));
+      await load();
+    } catch (error) { setMessage(error instanceof Error ? error.message : "수집 자료를 확인해주세요."); }
+    finally { setCollectionBusy(false); }
+  };
+
   const update = <K extends keyof PlaceRecord>(key: K, value: PlaceRecord[K]) => {
     setDraft((current) => current ? { ...current, [key]: value } : current);
     setMissingFields((current) => current.filter((item) => item !== key));
@@ -144,6 +160,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
           <div className={styles.researchBottom}><p className={styles.researchNote}>첫 10건은 API 조사 · 이후에는 검색 링크 제공</p><button className={styles.manualButton} onClick={() => { setDraft(emptyPlace()); setMissingFields([]); setMessage("빈 초안을 열었어요."); }}>+ 직접 입력</button></div>
         </section>
 
+        <details className={styles.researchCard}><summary>직원 수집 자료 등록</summary><p>확인한 후보를 등록합니다. 기존 장소는 덮어쓰지 않으며 새 장소는 검토 대기로 시작합니다.</p><label>수집 자료 파일<input type="file" accept=".json,application/json" aria-label="수집 자료 파일" onChange={async e => { const file = e.target.files?.[0]; if (file) setCollectionText(await file.text()); }} /></label><label>수집 자료<textarea aria-label="직원 수집 자료" rows={6} value={collectionText} onChange={e => setCollectionText(e.target.value)} /></label><button disabled={collectionBusy || !collectionText.trim()} onClick={importCollection}>{collectionBusy ? "등록 중…" : "수집 후보 등록"}</button></details>
         {message && <div className={styles.notice} role="status">{message}</div>}
         {links.length > 0 && <div className={styles.linkRow}>{links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>}
 
@@ -207,6 +224,12 @@ function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: 
         <div className={styles.grid2}><Field label="수유실"><select {...field("nursingRoom")}><option>확인 필요</option><option>있음</option><option>없음</option></select></Field><Field label="기저귀갈이대"><select {...field("changingTable")}><option>확인 필요</option><option>있음</option><option>없음</option></select></Field></div>
       </FormSection>
 
+      <FormSection title="파생 체험 공간" description="독립된 이름과 이용 방식이 있는 체험 공간만 상위 장소를 연결하세요. 일반 장소는 비워둡니다.">
+        <Field label="상위 장소 ID"><input type="number" min="1" value={draft.parentPlaceId ?? ""} onChange={e => update("parentPlaceId", e.target.value ? Number(e.target.value) : null)} /></Field>
+      </FormSection>
+      <FormSection title="장소 태그 점수" description="확인한 정보로 0~5점을 평가합니다. 소근육·인지 활동 위주의 체력빼기는 최대 3점입니다.">
+        {TAG_FIELDS.map(key => <div key={key}><Field label={TAG_LABELS[key]}><input type="number" min="0" max="5" step="1" value={draft[key] ?? ""} onChange={e => update(key, e.target.value === "" ? null : Number(e.target.value))} /></Field><Field label={`${TAG_LABELS[key]} 평가 근거`}><input value={draft.tagEvidence?.[key] ?? ""} onChange={e => update("tagEvidence", { ...draft.tagEvidence, [key]: e.target.value })} /></Field></div>)}
+      </FormSection>
       <FormSection title="공개 카드" description="A와 B 추천 결과에 함께 사용되는 내용이에요.">
         <Field label="한줄 소개" required invalid={missing.has("summary")}><textarea id="field-summary" {...field("summary")} placeholder="이 장소가 가족에게 좋은 이유를 한 문장으로" /></Field>
         <Field label="추천 이유" required invalid={missing.has("reasons")}><textarea id="field-reasons" value={draft.reasons.join("\n")} onChange={(e) => update("reasons", e.target.value.split("\n"))} placeholder={'이유마다 줄바꿈\n예: 실내외를 함께 즐길 수 있음'} /></Field>

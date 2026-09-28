@@ -362,3 +362,8 @@ h1 strong { color: var(--purple); font-weight: 950; }
 .place-details summary { cursor: pointer; font-weight: 600; }
 .place-details dl > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; margin: 8px 0; }
 .place-details dd { margin: 0; overflow-wrap: anywhere; }
+
+.place-tags { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.place-tag { padding:6px 10px; border-radius:6px; font-size:14px; font-weight:600; }
+.place-tag.strong { background:#64358c; color:#fff; }
+.place-tag.dimmed { background:#eeeef1; color:#65656e; }

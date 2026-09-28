@@ -37,6 +37,7 @@ function toPublicPlace(row: DbPlace): Place {
     affiliateUrl: row.affiliateUrl || undefined,
     fullAddress: row.fullAddress,
     details: placeDetails(row),
+    tagScores: { aestheticScore: row.aestheticScore, activityScore: row.activityScore, rarityScore: row.rarityScore },
   };
 }
 
