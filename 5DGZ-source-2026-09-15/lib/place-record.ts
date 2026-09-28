@@ -1,3 +1,5 @@
+import type { ResearchStatus, ReviewStatus } from "./place-status";
+
 export const THEMES = ["실내", "야외", "특별한 체험", "감성적 휴식"] as const;
 export const CATEGORIES = ["미지정", "문화", "체험", "카페", "자연", "테마파크", "식당", "공공"] as const;
 export const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
@@ -19,7 +21,7 @@ export type PlaceRecord = {
   district: string;
   weeklyHours: WeeklyHours;
   holidayHours: string;
-  reservationRequired: boolean;
+  reservationRequired: boolean | null;
   reservationOpenRule: string;
   reservationUrl: string;
   ageRestriction: string;
@@ -42,6 +44,9 @@ export type PlaceRecord = {
   score: number;
   ticketCandidate: boolean;
   affiliateUrl: string;
+  researchStatus?: ResearchStatus;
+  reviewStatus?: ReviewStatus;
+  isPublic?: boolean;
   status?: string;
   duplicateOfId?: number | null;
   reviewer: string;
@@ -52,16 +57,17 @@ export type PlaceRecord = {
 };
 
 export function emptyHours(): WeeklyHours {
-  return Object.fromEntries(DAYS.map((day) => [day, { closed: false, open: "10:00", close: "18:00", note: "" }])) as WeeklyHours;
+  return Object.fromEntries(DAYS.map((day) => [day, { closed: false, open: "", close: "", note: "" }])) as WeeklyHours;
 }
 
 export function emptyPlace(name = ""): PlaceRecord {
   return {
-    name, branchName: "", category: "체험", fullAddress: "", province: "", city: "", district: "",
-    weeklyHours: emptyHours(), holidayHours: "확인 필요", reservationRequired: false,
+    researchStatus: "hold", reviewStatus: "pending", isPublic: false,
+    name, branchName: "", category: "미지정", fullAddress: "", province: "", city: "", district: "",
+    weeklyHours: emptyHours(), holidayHours: "확인 필요", reservationRequired: null,
     reservationOpenRule: "", reservationUrl: "", ageRestriction: "없음",
     prices: [{ label: "전체", minAge: "", maxAge: "", price: "", free: false, note: "확인 필요" }],
-    timeSurcharge: "", themes: [], environment: "혼합", parkingType: "확인 필요",
+    timeSurcharge: "", themes: [], environment: "미지정", parkingType: "확인 필요",
     parkingFee: "", parkingSupport: "", nursingRoom: "확인 필요", changingTable: "확인 필요",
     officialSources: [{ label: "공식 홈페이지", url: "" }], imageUrl: "", imageSourceUrl: "",
     summary: "", reasons: [""], caution: "", ageHint: "영유아부터", score: 80,

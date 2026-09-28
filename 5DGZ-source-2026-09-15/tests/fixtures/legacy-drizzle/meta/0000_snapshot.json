@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9a2c4ff4-f50f-4883-b3f0-c6e0c3da0ab7",
+  "id": "0c6aeefa-0ad7-426f-84ee-d2eb9198b906",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "places": {
@@ -35,7 +35,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\uccb4\ud5d8'"
+          "default": "'체험'"
         },
         "full_address": {
           "name": "full_address",
@@ -90,14 +90,15 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\ud655\uc778 \ud544\uc694'"
+          "default": "'확인 필요'"
         },
         "reservation_required": {
           "name": "reservation_required",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "reservation_open_rule": {
           "name": "reservation_open_rule",
@@ -121,7 +122,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\uc5c6\uc74c'"
+          "default": "'없음'"
         },
         "prices": {
           "name": "prices",
@@ -151,7 +152,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\ud63c\ud569'"
+          "default": "'혼합'"
         },
         "parking_type": {
           "name": "parking_type",
@@ -159,7 +160,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\ud655\uc778 \ud544\uc694'"
+          "default": "'확인 필요'"
         },
         "parking_fee": {
           "name": "parking_fee",
@@ -183,7 +184,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\ud655\uc778 \ud544\uc694'"
+          "default": "'확인 필요'"
         },
         "changing_table": {
           "name": "changing_table",
@@ -191,7 +192,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\ud655\uc778 \ud544\uc694'"
+          "default": "'확인 필요'"
         },
         "official_sources": {
           "name": "official_sources",
@@ -245,7 +246,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\uc601\uc720\uc544\ubd80\ud130'"
+          "default": "'영유아부터'"
         },
         "score": {
           "name": "score",
@@ -270,30 +271,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "''"
-        },
-        "research_status": {
-          "name": "research_status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'hold'"
-        },
-        "review_status": {
-          "name": "review_status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'pending'"
-        },
-        "is_public": {
-          "name": "is_public",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "status": {
           "name": "status",
@@ -352,13 +329,6 @@
         }
       },
       "indexes": {
-        "idx_places_public": {
-          "name": "idx_places_public",
-          "columns": [
-            "is_public"
-          ],
-          "isUnique": false
-        },
         "idx_places_status": {
           "name": "idx_places_status",
           "columns": [

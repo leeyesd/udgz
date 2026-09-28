@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceDetails from "./PlaceDetails";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Mood, places } from "../lib/places";
 import { loadPlaces } from "../lib/live-places";
@@ -124,6 +125,7 @@ export default function Home() {
                     <div className="reason-row">
                       {place.reasons.map(reason => <span key={reason}>✓ {reason}</span>)}
                     </div>
+                    <PlaceDetails details={place.details} />
                     {place.caution && <p className="caution">확인할 점 · {place.caution}</p>}
                     <div className="place-actions">
                       <a className="action primary-action" href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer" onClick={() => trackEvent("route_click", { place: place.name, rank: index + 1 })}>길찾기 <span>↗</span></a>

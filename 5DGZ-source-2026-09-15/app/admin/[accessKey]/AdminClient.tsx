@@ -10,7 +10,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
   const [places, setPlaces] = useState<PlaceRecord[]>([]);
   const [researchCount, setResearchCount] = useState(0);
   const [placeName, setPlaceName] = useState("");
-  const [tab, setTab] = useState("pending");
+  const [tab, setTab] = useState("hold");
   const [draft, setDraft] = useState<PlaceRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [researching, setResearching] = useState(false);
@@ -50,8 +50,8 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
     return () => { active = false; };
   }, [request]);
 
-  const counts = useMemo(() => Object.fromEntries(["pending", "published", "duplicate"].map((status) => [status, places.filter((place) => place.status === status).length])), [places]);
-  const visible = places.filter((place) => place.status === tab);
+  const counts = useMemo(() => Object.fromEntries(["hold", "incomplete", "review_required", "duplicate"].map((status) => [status, places.filter((place) => (status === "duplicate" ? place.status === "duplicate" : place.status !== "duplicate" && place.researchStatus === status)).length])), [places]);
+  const visible = places.filter((place) => (tab === "duplicate" ? place.status === "duplicate" : place.status !== "duplicate" && place.researchStatus === tab));
 
   const research = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -69,7 +69,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
       } else {
         setDraft(data.place);
         setMissingFields([]);
-        setTab(data.duplicate ? "duplicate" : "pending");
+        setTab(data.duplicate ? "duplicate" : "hold");
         setMessage(data.duplicate ? "같은 주소의 장소가 있어 중복으로 분류했어요." : "AI 초안을 만들었어요. 반드시 출처와 내용을 확인해주세요.");
         await load();
       }
@@ -81,7 +81,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
     }
   };
 
-  const save = async (action: "save" | "publish") => {
+  const save = async (action: "save" | "approve" | "reject") => {
     if (!draft) return;
     setSaving(true); setMessage("");
     try {
@@ -103,8 +103,8 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
         }
         throw new Error(data.error);
       }
-      setTab(data.place.status);
-      setMessage(data.place.status === "published" ? "정식 DB에 공개 등록했어요." : data.place.status === "duplicate" ? "동일한 전체주소를 찾아 중복으로 분류했어요." : "보류 상태로 저장했어요.");
+      setTab(data.place.status === "duplicate" ? "duplicate" : data.place.researchStatus);
+      setMessage(data.place.isPublic ? "정식 DB에 공개 등록했어요." : data.place.status === "duplicate" ? "동일한 전체주소를 찾아 중복으로 분류했어요." : "보류 상태로 저장했어요.");
       setDraft(null);
       setLinks([]);
       setMissingFields([]);
@@ -132,7 +132,7 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
       <section className={styles.shell}>
         <div className={styles.heading}>
           <div><span className={styles.eyebrow}>CURATION DESK</span><h1>좋은 장소를<br />한 곳씩 쌓아요.</h1></div>
-          <div className={styles.stats}><div><b>{counts.pending ?? 0}</b><span>보류</span></div><div><b>{counts.published ?? 0}</b><span>공개</span></div><div><b>{Math.max(0, 10 - researchCount)}</b><span>AI 조사 잔여</span></div></div>
+          <div className={styles.stats}><div><b>{counts.hold ?? 0}</b><span>보류</span></div><div><b>{places.filter((place) => place.isPublic).length}</b><span>공개</span></div><div><b>{Math.max(0, 10 - researchCount)}</b><span>AI 조사 잔여</span></div></div>
         </div>
 
         <section className={styles.researchCard}>
@@ -148,14 +148,14 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
         {links.length > 0 && <div className={styles.linkRow}>{links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>}
 
         <nav className={styles.tabs} aria-label="장소 상태">
-          {[{ key: "pending", label: "보류" }, { key: "published", label: "공개" }, { key: "duplicate", label: "중복" }].map((item) => <button key={item.key} className={tab === item.key ? styles.active : ""} onClick={() => setTab(item.key)}>{item.label} <b>{counts[item.key] ?? 0}</b></button>)}
+          {[{ key: "hold", label: "보류" }, { key: "incomplete", label: "정보 미완료" }, { key: "review_required", label: "검토 대상" }, ...(counts.duplicate ? [{ key: "duplicate", label: "중복" }] : [])].map((item) => <button key={item.key} className={tab === item.key ? styles.active : ""} onClick={() => setTab(item.key)}>{item.label} <b>{counts[item.key] ?? 0}</b></button>)}
         </nav>
 
         <div className={styles.workspace}>
           <aside className={styles.queue}>
             {loading ? <p className={styles.queueState}>DB를 불러오는 중…</p> : visible.length === 0 ? <div className={styles.queueState}><b>아직 장소가 없어요</b><span>검색하거나 직접 입력해보세요.</span></div> : visible.map((place) => (
               <button key={place.id} className={draft?.id === place.id ? styles.queueActive : styles.queueItem} onClick={() => { setDraft(structuredClone(place)); setMissingFields([]); }}>
-                <span>{place.aiResearched ? "AI 초안" : "직접 입력"}</span><b>{place.name}{place.branchName ? ` ${place.branchName}` : ""}</b><small>{place.fullAddress || "주소 확인 필요"}</small>
+                <span>{place.reviewStatus === "approved" ? "승인" : place.reviewStatus === "rejected" ? "거절" : "검토 대기"} · {place.isPublic ? "공개" : "비공개"}</span><b>{place.name}{place.branchName ? ` ${place.branchName}` : ""}</b><small>{place.fullAddress || "찾는중.."}</small>
               </button>
             ))}
           </aside>
@@ -167,12 +167,17 @@ export default function AdminClient({ adminToken }: { adminToken: string }) {
   );
 }
 
-function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: PlaceRecord; update: <K extends keyof PlaceRecord>(key: K, value: PlaceRecord[K]) => void; onSave: (action: "save" | "publish") => void; saving: boolean; missingFields: string[] }) {
+function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: PlaceRecord; update: <K extends keyof PlaceRecord>(key: K, value: PlaceRecord[K]) => void; onSave: (action: "save" | "approve" | "reject") => void; saving: boolean; missingFields: string[] }) {
   const field = (key: keyof PlaceRecord) => ({ value: String(draft[key] ?? ""), onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => update(key, event.target.value as never) });
   const missing = new Set(missingFields);
   return (
     <section className={styles.editor}>
       <div className={styles.editorHeader}><div><span>02 · DOUBLE CHECK</span><h2>{draft.id ? "장소 정보 검수" : "새 장소 입력"}</h2></div><span className={`${styles.status} ${styles[draft.status ?? "pending"]}`}>{draft.status === "published" ? "공개" : draft.status === "duplicate" ? "중복" : "보류"}</span></div>
+
+      <FormSection title="조사 및 검토 상태" description="보류는 비공개, 정보 미완료는 승인 후 공개, 검토 대상은 승인 전에도 공개됩니다. 거절하면 보류로 돌아갑니다.">
+        <Field label="조사 상태"><select value={draft.researchStatus ?? "hold"} onChange={(e) => update("researchStatus", e.target.value as PlaceRecord["researchStatus"])}><option value="hold">보류</option><option value="incomplete">정보 미완료</option><option value="review_required">검토 대상</option></select></Field>
+        <p>검토: {draft.reviewStatus === "approved" ? "승인" : draft.reviewStatus === "rejected" ? "거절" : "대기"}</p>
+      </FormSection>
 
       <FormSection title="기본 정보" description="주소는 검색 결과 필터링을 위해 계층별로 저장해요.">
         <div className={styles.grid2}><Field label="장소명" required invalid={missing.has("name")}><input id="field-name" {...field("name")} /></Field><Field label="지점명"><input {...field("branchName")} placeholder="판교점" /></Field></div>
@@ -184,7 +189,7 @@ function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: 
       <FormSection title="운영시간" description="공휴일과 예약 오픈 규칙은 문장 그대로 저장해요.">
         <div className={styles.hours}>{DAYS.map((day) => { const value = draft.weeklyHours[day]; return <div className={styles.hourRow} key={day}><b>{day}</b><label><input type="checkbox" checked={value.closed} onChange={(e) => update("weeklyHours", { ...draft.weeklyHours, [day]: { ...value, closed: e.target.checked } })} /> 휴무</label><input type="time" value={value.open} disabled={value.closed} onChange={(e) => update("weeklyHours", { ...draft.weeklyHours, [day]: { ...value, open: e.target.value } })} /><span>–</span><input type="time" value={value.close} disabled={value.closed} onChange={(e) => update("weeklyHours", { ...draft.weeklyHours, [day]: { ...value, close: e.target.value } })} /><input value={value.note} onChange={(e) => update("weeklyHours", { ...draft.weeklyHours, [day]: { ...value, note: e.target.value } })} placeholder="입장 마감 등" /></div>; })}</div>
         <Field label="공휴일 운영 여부"><input {...field("holidayHours")} placeholder="공휴일 정상 운영 / 설날 당일 휴무" /></Field>
-        <div className={styles.grid2}><Field label="예약 필요"><select value={draft.reservationRequired ? "yes" : "no"} onChange={(e) => update("reservationRequired", e.target.value === "yes")}><option value="no">아니오</option><option value="yes">예</option></select></Field><Field label="예약 오픈 규칙"><input {...field("reservationOpenRule")} placeholder="매달 1일 오전 10시" /></Field></div>
+        <div className={styles.grid2}><Field label="예약 필요"><select value={draft.reservationRequired == null ? "unknown" : draft.reservationRequired ? "yes" : "no"} onChange={(e) => update("reservationRequired", e.target.value === "unknown" ? null : e.target.value === "yes")}><option value="unknown">찾는중..</option><option value="no">아니오</option><option value="yes">예</option></select></Field><Field label="예약 오픈 규칙"><input {...field("reservationOpenRule")} placeholder="매달 1일 오전 10시" /></Field></div>
         <Field label="예약 링크"><input type="url" {...field("reservationUrl")} placeholder="https://" /></Field>
       </FormSection>
 
@@ -210,7 +215,7 @@ function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: 
         <Field label="제휴 링크"><input type="url" {...field("affiliateUrl")} placeholder="https://" /></Field>
       </FormSection>
 
-      <FormSection title="출처와 검수" description="공식 출처가 최소 한 개 있어야 공개할 수 있어요.">
+      <FormSection title="출처와 검수" description="확인한 출처와 검수 기록을 남겨주세요.">
         <div id="field-officialSources" tabIndex={-1} className={`${styles.rows} ${missing.has("officialSources") ? styles.invalidGroup : ""}`}>{draft.officialSources.map((source, index) => <div className={styles.sourceRow} key={index}><input value={source.label} onChange={(e) => update("officialSources", draft.officialSources.map((row, i) => i === index ? { ...row, label: e.target.value } : row))} placeholder="공식 홈페이지" /><input type="url" value={source.url} onChange={(e) => update("officialSources", draft.officialSources.map((row, i) => i === index ? { ...row, url: e.target.value } : row))} placeholder="https://" /><a href={source.url || "#"} target="_blank" rel="noreferrer">열기 ↗</a><button onClick={() => update("officialSources", draft.officialSources.filter((_, i) => i !== index))} aria-label="출처 삭제">×</button></div>)}</div>
         {missing.has("officialSources") && <p className={styles.inlineError}>* 공식 출처 URL을 하나 이상 입력해주세요.</p>}
         <button className={styles.addRow} onClick={() => update("officialSources", [...draft.officialSources, { label: "", url: "" }])}>+ 출처 추가</button>
@@ -218,7 +223,7 @@ function PlaceEditor({ draft, update, onSave, saving, missingFields }: { draft: 
         <div className={styles.grid2}><Field label="마지막 확인일" required invalid={missing.has("lastVerifiedAt")}><input id="field-lastVerifiedAt" type="date" {...field("lastVerifiedAt")} /></Field><Field label="검수자 이름" required invalid={missing.has("reviewer")}><input id="field-reviewer" {...field("reviewer")} placeholder="션디" /></Field></div>
       </FormSection>
 
-      <div className={styles.actionBar}>{missingFields.length > 0 && <p className={styles.validationText}>필수입력값을 채워주세요.</p>}<button className={styles.saveButton} disabled={saving} onClick={() => onSave("save")}>보류로 저장</button><button className={styles.publishButton} disabled={saving || draft.status === "duplicate"} onClick={() => onSave("publish")}>{saving ? "저장 중…" : "검수 완료 · 정식 DB에 추가"}</button></div>
+      <div className={styles.actionBar}>{missingFields.length > 0 && <p className={styles.validationText}>필수입력값을 채워주세요.</p>}<button className={styles.saveButton} disabled={saving} onClick={() => onSave("save")}>저장</button><button className={styles.publishButton} disabled={saving || draft.status === "duplicate"} onClick={() => onSave("approve")}>{saving ? "저장 중…" : "승인"}</button><button className={styles.saveButton} disabled={saving} onClick={() => onSave("reject")}>거절 · 보류로 이동</button></div>
     </section>
   );
 }

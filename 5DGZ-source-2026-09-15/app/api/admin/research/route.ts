@@ -18,7 +18,7 @@ function schema() {
       fullAddress: { type: "string" }, province: { type: "string" }, city: { type: "string" }, district: { type: "string" },
       weeklyHours: { type: "array", items: day }, holidayHours: { type: "string" }, ageRestriction: { type: "string" },
       prices: { type: "array", items: price }, timeSurcharge: { type: "string" }, parkingType: { type: "string" },
-      parkingFee: { type: "string" }, parkingSupport: { type: "string" }, reservationRequired: { type: "boolean" },
+      parkingFee: { type: "string" }, parkingSupport: { type: "string" }, reservationRequired: { type: ["boolean", "null"] },
       reservationOpenRule: { type: "string" }, reservationUrl: { type: "string" }, nursingRoom: { type: "string" }, changingTable: { type: "string" },
       officialSources: { type: "array", items: source }, imageUrl: { type: "string" }, imageSourceUrl: { type: "string" },
       summary: { type: "string" }, reasons: { type: "array", items: { type: "string" } }, caution: { type: "string" }, ageHint: { type: "string" },
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     const duplicate = addressKey ? await db.select({ id: places.id }).from(places).where(eq(places.addressKey, addressKey)).orderBy(desc(places.id)).limit(1) : [];
     const status = duplicate.length ? "duplicate" : "pending";
     const [saved] = await db.insert(places).values({
-      ...item, id: undefined, addressKey, status, duplicateOfId: duplicate[0]?.id ?? null,
+      ...item, id: undefined, addressKey, status, researchStatus: "hold", reviewStatus: "pending", isPublic: false, duplicateOfId: duplicate[0]?.id ?? null,
       officialSources: item.officialSources ?? [], prices: item.prices ?? [], reasons: item.reasons ?? [], themes: [],
     }).returning();
     await db.insert(researchRuns).values({ query: placeName, status: "success" });

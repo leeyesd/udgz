@@ -6,7 +6,7 @@ export type Place = {
   region: string;
   category: "문화" | "체험" | "카페" | "자연" | "테마파크" | "식당" | "공공";
   moods: Mood[];
-  coreEnvironment: "실내" | "야외" | "실내·야외";
+  coreEnvironment: "실내" | "야외" | "실내·야외" | "찾는중..";
   score: number;
   ageHint: string;
   summary: string;
@@ -15,6 +15,7 @@ export type Place = {
   ticketCandidate?: boolean;
   affiliateUrl?: string;
   fullAddress?: string;
+  details?: { label: string; value: string }[];
 };
 
 export const places: Place[] = [

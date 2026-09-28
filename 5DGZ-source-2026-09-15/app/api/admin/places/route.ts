@@ -5,7 +5,8 @@ import { places, researchRuns } from "../../../../db/schema";
 import { isAdminRequest, unauthorized } from "../../../../lib/admin-access";
 import { emptyPlace, normalizeAddress, normalizeThemes, type PlaceRecord } from "../../../../lib/place-record";
 
-type MissingField = { key: string; label: string };
+import { resolvePlaceStatus } from "../../../../lib/place-status";
+
 
 function errorResponse(error: unknown) {
   const message = error instanceof Error ? error.message : "장소 DB 처리 중 오류가 발생했습니다.";
@@ -32,22 +33,6 @@ function cleanPlace(input: Partial<PlaceRecord>): PlaceRecord {
   };
 }
 
-function validateForPublish(place: PlaceRecord) {
-  const missing: MissingField[] = [];
-  if (!place.name) missing.push({ key: "name", label: "장소명" });
-  if (!place.fullAddress) missing.push({ key: "fullAddress", label: "전체주소" });
-  if (!place.province) missing.push({ key: "province", label: "시/도" });
-  if (!place.city) missing.push({ key: "city", label: "시/군/구" });
-  if (!place.district) missing.push({ key: "district", label: "읍/면/동" });
-  if (!place.themes.length) missing.push({ key: "themes", label: "테마" });
-  if (!place.summary) missing.push({ key: "summary", label: "한줄 소개" });
-  if (!place.reasons.length) missing.push({ key: "reasons", label: "추천 이유" });
-  if (!place.officialSources.length) missing.push({ key: "officialSources", label: "공식 출처" });
-  if (!place.lastVerifiedAt) missing.push({ key: "lastVerifiedAt", label: "마지막 확인일" });
-  if (!place.reviewer) missing.push({ key: "reviewer", label: "검수자 이름" });
-  return missing;
-}
-
 export async function GET(request: Request) {
   if (!isAdminRequest(request)) return unauthorized();
   try {
@@ -66,9 +51,9 @@ export async function POST(request: Request) {
   if (!isAdminRequest(request)) return unauthorized();
   try {
     await ensureDatabase();
-    const payload = await request.json() as { action?: "save" | "publish"; place?: Partial<PlaceRecord> };
+    const payload = await request.json() as { action?: "save" | "approve" | "reject"; place?: Partial<PlaceRecord> };
     const item = cleanPlace(payload.place ?? {});
-    if (!item.name) return Response.json({ error: "필수입력값을 채워주세요.", missing: [{ key: "name", label: "장소명" }] satisfies MissingField[] }, { status: 400 });
+    if (!item.name) return Response.json({ error: "필수입력값을 채워주세요.", missing: [{ key: "name", label: "장소명" }]  }, { status: 400 });
 
     const db = getDb();
     const addressKey = normalizeAddress(item.fullAddress);
@@ -78,12 +63,18 @@ export async function POST(request: Request) {
         ).limit(1)
       : [];
 
-    let status = payload.action === "publish" ? "published" : "pending";
-    if (duplicate.length) status = "duplicate";
-    if (payload.action === "publish" && !duplicate.length) {
-      const missing = validateForPublish(item);
-      if (missing.length) return Response.json({ error: "필수입력값을 채워주세요.", missing }, { status: 400 });
+    if (payload.action && !["save", "approve", "reject"].includes(payload.action)) return Response.json({ error: "지원하지 않는 작업입니다." }, { status: 400 });
+    const existing = item.id ? (await db.select().from(places).where(eq(places.id, item.id)).limit(1))[0] : undefined;
+    if (item.id && !existing) return Response.json({ error: "장소를 찾을 수 없습니다." }, { status: 404 });
+    const reviewStatus = payload.action === "approve" ? "approved" : payload.action === "reject" ? "rejected" : (existing?.reviewStatus ?? "pending");
+    let state;
+    try {
+      state = resolvePlaceStatus(payload.place?.researchStatus ?? (existing?.researchStatus as PlaceRecord["researchStatus"]) ?? "hold", reviewStatus as "pending" | "approved" | "rejected", Boolean(duplicate.length));
+    } catch {
+      return Response.json({ error: "올바르지 않은 장소 상태입니다." }, { status: 400 });
     }
+    // Keep legacy status compatible until the production duplicate count is verified.
+    const status = duplicate.length ? "duplicate" : state.isPublic ? "published" : "pending";
 
     const values = {
       name: item.name, branchName: item.branchName, category: item.category, fullAddress: item.fullAddress,
@@ -96,7 +87,7 @@ export async function POST(request: Request) {
       nursingRoom: item.nursingRoom, changingTable: item.changingTable, officialSources: item.officialSources,
       imageUrl: item.imageUrl, imageSourceUrl: item.imageSourceUrl, summary: item.summary,
       reasons: item.reasons, caution: item.caution, ageHint: item.ageHint, score: item.score,
-      ticketCandidate: item.ticketCandidate, affiliateUrl: item.affiliateUrl, status,
+      ticketCandidate: item.ticketCandidate, affiliateUrl: item.affiliateUrl, status, ...state,
       duplicateOfId: duplicate[0]?.id ?? null, reviewer: item.reviewer,
       aiResearched: Boolean(item.aiResearched), lastVerifiedAt: item.lastVerifiedAt,
       updatedAt: new Date().toISOString(),

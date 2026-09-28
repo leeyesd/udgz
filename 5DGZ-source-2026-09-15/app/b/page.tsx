@@ -1,5 +1,6 @@
 "use client";
 
+import PlaceDetails from "../PlaceDetails";
 import { Fragment, useMemo, useState } from "react";
 import { Mood, places } from "../../lib/places";
 import { loadPlaces } from "../../lib/live-places";
@@ -85,6 +86,7 @@ export default function VariantB() {
                     <h2>{place.name}</h2>
                     <p>{place.summary}</p>
                     <ul>{place.reasons.slice(0, 2).map(reason => <li key={reason}>{reason}</li>)}</ul>
+                    <PlaceDetails details={place.details} />
                     {place.caution && <p className={styles.caution}>확인 · {place.caution}</p>}
                     <div className={styles.resultActions}>
                       <a className={styles.routeButton} href={`https://map.naver.com/p/search/${encodeURIComponent(place.name)}`} target="_blank" rel="noreferrer">길찾기 ↗</a>

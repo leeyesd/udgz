@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       fullAddress: item.fullAddress.trim(), addressKey: item.addressKey ?? "",
       province: item.province ?? "", city: item.city ?? "", district: item.district ?? "",
       weeklyHours: item.weeklyHours, holidayHours: item.holidayHours ?? "확인 필요",
-      reservationRequired: Boolean(item.reservationRequired), reservationOpenRule: item.reservationOpenRule ?? "",
+      reservationRequired: item.reservationRequired ?? null, reservationOpenRule: item.reservationOpenRule ?? "",
       reservationUrl: item.reservationUrl ?? "", ageRestriction: item.ageRestriction ?? "확인 필요",
       prices: item.prices ?? [], timeSurcharge: item.timeSurcharge ?? "", themes: [], environment: "미지정",
       parkingType: item.parkingType ?? "확인 필요", parkingFee: item.parkingFee ?? "", parkingSupport: item.parkingSupport ?? "",
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       officialSources: item.officialSources ?? [], imageUrl: "", imageSourceUrl: "",
       summary: "", reasons: [], caution: item.caution ?? "", ageHint: item.ageHint ?? "",
       score: 80, ticketCandidate: Boolean(item.ticketCandidate), affiliateUrl: "",
+      researchStatus: "hold", reviewStatus: "pending", isPublic: false,
       status: item.status === "duplicate" ? "duplicate" : "pending", duplicateOfId: null,
       reviewer: "", aiResearched: false, lastVerifiedAt: "", updatedAt: now,
     }));

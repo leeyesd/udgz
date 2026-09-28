@@ -357,3 +357,8 @@ h1 strong { color: var(--purple); font-weight: 950; }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }
 }
+
+.place-details { margin: 12px 0; font-size: 14px; }
+.place-details summary { cursor: pointer; font-weight: 600; }
+.place-details dl > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; margin: 8px 0; }
+.place-details dd { margin: 0; overflow-wrap: anywhere; }
