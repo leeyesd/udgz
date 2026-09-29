@@ -1,3 +1,4 @@
+import { normalizeRegion } from "../../../../lib/place-region";
 import { normalizeLinks } from "../../../../lib/place-links";
 import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, eq, gt } from "drizzle-orm";
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
       ...normalizeLinks({ ...item, name: mergedPlaceName(item.name, item.branchName ?? "") }),
       name: mergedPlaceName(item.name, item.branchName ?? ""), branchName: "", category: "미지정",
       fullAddress: item.fullAddress.trim(), addressKey: item.addressKey ?? "",
-      province: item.province ?? "", city: item.city ?? "", district: item.district ?? "",
+      ...normalizeRegion(item), district: item.district ?? "",
       weeklyHours: item.weeklyHours, holidayHours: item.holidayHours ?? "확인 필요",
       reservationRequired: item.reservationRequired ?? null, reservationOpenRule: item.reservationOpenRule ?? "",
       ageRestriction: item.ageRestriction ?? "확인 필요",

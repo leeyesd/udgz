@@ -14,7 +14,7 @@ import styles from "./b.module.css";
 
 const ages = [0, 1, 2, 3, 4, 5, 6, 7];
 const moods: { value: VisitMood; title: string; description: string; icon: string }[] = [
- {value:"감성적 휴식",title:"감성적 휴식",description:"감도 높은 공간에서 쉬어가기",icon:"♧"},
+ {value:"감성적 휴식",title:"감성적 휴식",description:"눈이 즐거운 곳에서 쉬어가기",icon:"♧"},
  {value:"특별한 체험",title:"특별한 체험",description:"평소와 다른 경험 만나기",icon:"✦"},
  {value:"신나게 놀기",title:"신나게 놀기",description:"몸을 움직이며 마음껏 놀기",icon:"☀"},
  {value:"실내 활동",title:"실내 활동",description:"실내 공간만 모아보기",icon:"⌂"},
@@ -128,7 +128,7 @@ export default function VariantB() {
         <div className={styles.heroCopy}>
           <span className={styles.overline}>직접 엄선하고, 계속 업데이트 중</span>
           <h1>이번 주말의 정답을<br /><strong>30초 안에.</strong></h1>
-          <p>5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
+          <p>SNS에서 좋아보이는 곳들,<br />막상 가려고하면 다시 찾아봐야했죠.<br />5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
         </div>
       </section>
 
@@ -152,7 +152,7 @@ export default function VariantB() {
 
           <fieldset className={styles.fieldset}>
             <legend><span>02</span><b>아이 나이는요?</b></legend>
-            <p className={styles.help}>만 나이 기준, 두 명 이상 선택 가능해요.</p>
+            <p className={styles.help}>다둥이라면 중복 선택 가능해요. 만 나이 기준.</p>
             <div className={styles.ageGrid}>{ages.map(age => <button type="button" key={age} aria-pressed={selectedAges.includes(age)} className={selectedAges.includes(age) ? styles.ageSelected : styles.age} onClick={() => toggleAge(age)}>{age}세</button>)}</div>
           </fieldset>
 
@@ -168,7 +168,7 @@ export default function VariantB() {
             <div className={styles.distanceGrid}>{["30분 이내", "30분 이상"].map(value => <button type="button" key={value} aria-pressed={distance === value} className={distance === value ? styles.distanceSelected : styles.distance} onClick={() => setDistance(value)}><span className={styles.radio} /><b>{value}</b><small>{value === "30분 이내" ? "가볍게 가까운 곳" : "좋다면 멀어도 괜찮아요"}</small></button>)}</div>
           </fieldset>
 
-          <fieldset className={styles.fieldset}><legend><span>05</span><b>언제 놀러가세요?</b></legend><VisitDatePicker value={visitDate} onChange={setVisitDate} /></fieldset>
+          <fieldset className={styles.fieldset}><legend><span>05</span><b>언제 놀러가세요?</b></legend><p className={styles.help}>평일 선택시 평일요금, 주말 선택시 주말 요금으로 나옵니다. 공휴일 선택시 운영 중인 장소만 나옵니다.</p><VisitDatePicker value={visitDate} onChange={setVisitDate} /></fieldset>
           <button className={styles.mobileSubmit} disabled={!canRecommend || loadingPlaces}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
         </form>
 

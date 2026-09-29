@@ -1,4 +1,4 @@
-import { desc, eq, count, asc, and, ne } from "drizzle-orm";
+import { desc, eq, count, asc, and, ne, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { ensureDatabase } from "../../../db/ensure";
 import { places } from "../../../db/schema";
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const db = getDb();
     if (params.get("regions") === "1") {
       const regions = await db.select({province:places.province,city:places.city,count:count()}).from(places)
-        .where(and(eq(places.isPublic,true),ne(places.city,"")))
+        .where(and(eq(places.isPublic,true),ne(places.city,""), ne(places.city,places.province), sql`${places.city} GLOB '*[시군구]'`))
         .groupBy(places.province,places.city).orderBy(desc(count()),asc(places.province),asc(places.city)).limit(5);
       return Response.json({regions});
     }

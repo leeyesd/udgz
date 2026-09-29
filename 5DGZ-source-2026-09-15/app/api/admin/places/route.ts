@@ -1,3 +1,4 @@
+import { normalizeRegion } from "../../../../lib/place-region";
 import { normalizeLinks, safeLink } from "../../../../lib/place-links";
 import { normalizePrice, mergedPlaceName } from "../../../../lib/place-pricing";
 import { and, count, desc, eq, ne, isNull } from "drizzle-orm";
@@ -24,8 +25,7 @@ function cleanPlace(input: Partial<PlaceRecord>): PlaceRecord {
     name: mergedPlaceName(input.name ?? "", input.branchName ?? ""),
     branchName: "",
     fullAddress: input.fullAddress?.trim() ?? "",
-    province: input.province?.trim() ?? "",
-    city: input.city?.trim() ?? "",
+    ...normalizeRegion(input),
     district: input.district?.trim() ?? "",
     themes: normalizeThemes(input.themes ?? []),
     reviewer: input.reviewer?.trim() ?? "",

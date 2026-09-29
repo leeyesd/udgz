@@ -12,7 +12,7 @@ import { places } from "../lib/places";
 import { loadPlaces } from "../lib/live-places";
 
 const moods: { value: VisitMood; description: string; icon: string }[] = [
-  { value: "감성적 휴식", description: "감도 높은 공간에서 쉬어가기", icon: "♧" },
+  { value: "감성적 휴식", description: "눈이 즐거운 곳에서 쉬어가기", icon: "♧" },
   { value: "특별한 체험", description: "평소와 다른 경험 만나기", icon: "✦" },
   { value: "신나게 놀기", description: "몸을 움직이며 마음껏 놀기", icon: "☀" },
   { value: "실내 활동", description: "실내 공간만 모아보기", icon: "⌂" },
@@ -163,7 +163,7 @@ export default function Home() {
       <section className="hero" id="top">
         <div className="eyebrow"><span /> 직접 엄선한 장소, 계속 업데이트 중</div>
         <h1>오늘<br /><strong>오디가지?</strong></h1>
-        <p className="hero-copy">5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
+        <p className="hero-copy">SNS에서 좋아보이는 곳들,<br />막상 가려고하면 다시 찾아봐야했죠.<br />5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
 
         <div className="finder-card one-page-form">
           <section className="form-section">
@@ -173,7 +173,7 @@ export default function Home() {
           </section>
 
           <section className="form-section">
-            <div className="compact-heading"><span>2</span><div><h2>아이 나이는요?</h2><p>만 나이 기준, 두 명 이상 선택 가능해요</p></div></div>
+            <div className="compact-heading"><span>2</span><div><h2>아이 나이는요?</h2><p>다둥이라면 중복 선택 가능해요. 만 나이 기준</p></div></div>
             <div className="age-grid multi-age">{[0,1,2,3,4,5,6,7].map(value => <button key={value} className={selectedAges.includes(value) ? "selected" : ""} aria-pressed={selectedAges.includes(value)} onClick={() => toggleAge(value)}>{value === 0 ? "0세" : `${value}세`}</button>)}</div>
           </section>
 
@@ -190,7 +190,7 @@ export default function Home() {
           </section>
 
           <section className="form-section">
-            <div className="compact-heading"><span>5</span><div><h2>언제 놀러가세요?</h2></div></div>
+            <div className="compact-heading"><span>5</span><div><h2>언제 놀러가세요?</h2><p>평일 선택시 평일요금, 주말 선택시 주말 요금으로 나옵니다. 공휴일 선택시 운영 중인 장소만 나옵니다.</p></div></div>
             <VisitDatePicker value={visitDate} onChange={setVisitDate} />
           </section>
 

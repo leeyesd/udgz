@@ -381,3 +381,5 @@ h1 strong { color: var(--purple); font-weight: 950; }
 .date-options button small { white-space:nowrap; font-size:13px; }
 .date-selected { font-size:14px; color:#6a566f; }
 .visit-date label { display:grid; gap:8px; }
+
+.calendar-icon { width: 18px; height: 18px; display: inline-block; vertical-align: -3px; margin-right: 6px; }
