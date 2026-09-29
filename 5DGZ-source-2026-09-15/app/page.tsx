@@ -1,17 +1,21 @@
 "use client";
 
+import { seoulToday, thisWeekend } from "../lib/visit-calendar";
+import VisitDatePicker from "./VisitDatePicker";
+import { rankPlaces, type VisitMood } from "../lib/recommendations";
+import { useTopRegions } from "../lib/use-top-regions";
 import PlaceActions from "./PlaceActions";
 import PlaceTags from "./PlaceTags";
 import PlaceDetails from "./PlaceDetails";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { Mood, places } from "../lib/places";
+import { places } from "../lib/places";
 import { loadPlaces } from "../lib/live-places";
 
-const moods: { value: Mood; description: string; icon: string }[] = [
-  { value: "실내", description: "날씨 걱정 없이 편안하게", icon: "⌂" },
-  { value: "야외", description: "마음껏 움직이고 뛰어놀기", icon: "☀" },
-  { value: "특별한 체험", description: "오늘만의 기억을 남기기", icon: "✦" },
-  { value: "감성적 휴식", description: "부모도 기분 좋게 쉬어가기", icon: "♧" },
+const moods: { value: VisitMood; description: string; icon: string }[] = [
+  { value: "감성적 휴식", description: "감도 높은 공간에서 쉬어가기", icon: "♧" },
+  { value: "특별한 체험", description: "평소와 다른 경험 만나기", icon: "✦" },
+  { value: "신나게 놀기", description: "몸을 움직이며 마음껏 놀기", icon: "☀" },
+  { value: "실내 활동", description: "실내 공간만 모아보기", icon: "⌂" },
 ];
 
 const categoryIcons = { 문화: "◫", 체험: "✦", "카페/식당": "☕", 자연: "♧", 테마파크: "★", 놀이공간: "▣" };
@@ -35,10 +39,11 @@ function CreatorFooter() {
 }
 
 export default function Home() {
-  const [visitDate, setVisitDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
+  const [visitDate, setVisitDate] = useState(() => { const today = seoulToday(); return thisWeekend(today).find(day => day >= today) ?? today; });
+  const topRegions = useTopRegions();
   const [location, setLocation] = useState("");
   const [selectedAges, setSelectedAges] = useState([2]);
-  const [mood, setMood] = useState<Mood>("실내");
+  const [mood, setMood] = useState<VisitMood>("실내 활동");
   const [travelTime, setTravelTime] = useState("30분 이내");
   const [showResults, setShowResults] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -48,13 +53,7 @@ export default function Home() {
   const startedAt = useRef(0);
   useEffect(() => { startedAt.current = Date.now(); }, []);
 
-  const recommendations = useMemo(() => {
-    return [...availablePlaces].sort((a, b) => {
-      const aFit = Object.values(a.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (a.moods.includes(mood) ? 18 : 0);
-      const bFit = Object.values(b.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (b.moods.includes(mood) ? 18 : 0);
-      return bFit - aFit;
-    });
-  }, [mood, availablePlaces]);
+  const recommendations = useMemo(() => rankPlaces(availablePlaces, mood), [mood, availablePlaces]);
 
   const getRecommendations = async () => {
     trackEvent("recommendation_complete", {
@@ -64,7 +63,7 @@ export default function Home() {
       elapsed_seconds: Math.round((Date.now() - startedAt.current) / 1000),
     });
     setLoadingPlaces(true);
-    setAvailablePlaces(await loadPlaces(location));
+    setAvailablePlaces(await loadPlaces(location, visitDate));
     setLoadingPlaces(false);
     setShowResults(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,9 +105,10 @@ export default function Home() {
 
           <div className="beta-note">
             <span>i</span>
-            <p><b>감도+체력빼기+경험희소성 상위 3곳을 먼저 보여드려요!</b></p>
+            <p><b>선택한 활동에 맞는 장소를 먼저 보여드려요!</b></p>
           </div>
 
+          {recommendations.length === 0 && <p role="status">선택한 지역·날짜·활동에 맞는 장소가 아직 없어요. 조건을 바꿔보세요.</p>}
           <div className="place-list">
             {visiblePlaces.map((place, index) => (
               <Fragment key={place.id}>
@@ -144,7 +144,7 @@ export default function Home() {
             ))}
           </div>
 
-          {!expanded && <button className="more-button" onClick={() => { setExpanded(true); trackEvent("more_results_click"); }}>다른 장소도 더 보기</button>}
+          {!expanded && recommendations.length > 3 && <button className="more-button" onClick={() => { setExpanded(true); trackEvent("more_results_click"); }}>다른 장소도 더 보기</button>}
 
           <CreatorFooter />
         </section>
@@ -163,13 +163,13 @@ export default function Home() {
       <section className="hero" id="top">
         <div className="eyebrow"><span /> 직접 엄선한 장소, 계속 업데이트 중</div>
         <h1>오늘<br /><strong>오디가지?</strong></h1>
-        <p className="hero-copy">SNS에서 좋아보이는 곳들,<br />막상 가려고하면 다시 찾아봐야했죠.<br />당장 갈 수 있는 곳 중에서<br />고르고 바로 출발하세요!</p>
+        <p className="hero-copy">5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
 
         <div className="finder-card one-page-form">
           <section className="form-section">
             <div className="compact-heading"><span>1</span><div><h2>어디 근처로 찾아볼까요?</h2><p>시간 떼우기용 말고, 추억 만들 공간을 찾아드려요</p></div></div>
             <label className="location-field"><span>⌖</span><input value={location} onChange={e => setLocation(e.target.value)} placeholder="서울 금천구" /></label>
-            <div className="quick-locations">{["의왕시", "안양시", "과천시", "수원시", "서울시"].map(city => <button key={city} className={location === city ? "selected" : ""} onClick={() => setLocation(city)}>{city}</button>)}</div>
+            <div className="quick-locations">{topRegions.map(city => <button key={city} className={location === city ? "selected" : ""} onClick={() => setLocation(city)}>{city}</button>)}</div>
           </section>
 
           <section className="form-section">
@@ -189,7 +189,10 @@ export default function Home() {
             <div className="time-options compact-time">{[["30분 이내", "오늘은 가까운 곳"], ["30분 이상", "좋은 곳이면 멀어도 괜찮아요"]].map(([time, copy]) => <button key={time} className={travelTime === time ? "selected" : ""} onClick={() => setTravelTime(time)}><span className="time-radio"/><span><b>{time}</b><small>{copy}</small></span></button>)}</div>
           </section>
 
-          <label className="visit-date">방문 날짜<input type="date" value={visitDate} required onChange={e => setVisitDate(e.target.value)} /><small>월~금은 평일, 토·일은 주말 요금입니다. 공휴일 요금은 이용 정보를 확인해주세요.</small></label>
+          <section className="form-section">
+            <div className="compact-heading"><span>5</span><div><h2>언제 놀러가세요?</h2></div></div>
+            <VisitDatePicker value={visitDate} onChange={setVisitDate} />
+          </section>
 
           <button className="primary-button recommend-button" disabled={!visitDate || !location.trim() || selectedAges.length === 0 || loadingPlaces} onClick={getRecommendations}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
           {selectedAges.length === 0 && <p className="selection-help">아이 나이를 한 개 이상 골라주세요.</p>}

@@ -374,3 +374,10 @@ h1 strong { color: var(--purple); font-weight: 950; }
 .visit-price, .place-age { font-size: 14px; line-height: 1.7; margin: 12px 0; }
 .place-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .place-visual > span, .place-visual > small { z-index: 1; }
+.date-options { display:flex; gap:8px; flex-wrap:wrap; }
+.date-options button { flex:1; min-width:90px; padding:13px 8px; border:1px solid #d8d0dd; border-radius:12px; background:white; color:#463c4d; cursor:pointer; font:inherit; }
+.date-options button.selected { background:#f3eafb; border-color:#8646a4; color:#71328e; }
+.date-options button:disabled { opacity:.4; cursor:default; }
+.date-options button small { white-space:nowrap; font-size:13px; }
+.date-selected { font-size:14px; color:#6a566f; }
+.visit-date label { display:grid; gap:8px; }

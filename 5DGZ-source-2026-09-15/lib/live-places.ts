@@ -1,6 +1,6 @@
 import { placeDetails, displayValue } from "./place-display";
 import type { PlaceRecord } from "./place-record";
-import { places as curatedFallback, type Mood, type Place } from "./places";
+import { type Mood, type Place } from "./places";
 
 type DbPlace = Partial<PlaceRecord> & {
   id: number; name: string; branchName: string; category: Place["category"]; fullAddress: string;
@@ -8,16 +8,6 @@ type DbPlace = Partial<PlaceRecord> & {
   ageHint: string; summary: string; reasons: string[]; caution: string;
   ticketCandidate: boolean; affiliateUrl: string;
 };
-
-function normalize(value: string) {
-  return value.normalize("NFKC").toLowerCase().replace(/특별자치|광역|특별|시|군|구|읍|면|동|\s/g, "");
-}
-
-function fallbackMatches(place: Place, location: string) {
-  const target = normalize(location);
-  const region = normalize(place.region);
-  return !target || target.includes(region) || region.includes(target);
-}
 
 function toPublicPlace(row: DbPlace): Place {
   return {
@@ -45,17 +35,13 @@ function toPublicPlace(row: DbPlace): Place {
   };
 }
 
-export async function loadPlaces(location: string): Promise<Place[]> {
+export async function loadPlaces(location: string, date = ""): Promise<Place[]> {
   try {
-    const response = await fetch(`/api/places?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/places?location=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}`);
     if (!response.ok) return [];
     const data = await response.json() as { places?: DbPlace[]; excludedFallbackIds?: string[] };
     const live = (data.places ?? []).map(toPublicPlace);
-    const allowedFallback = curatedFallback.filter(place => !data.excludedFallbackIds?.includes(place.id));
-    if (!live.length) return allowedFallback;
-    const names = new Set(live.map((place) => place.name.replace(/\s/g, "")));
-    const matchingFallback = allowedFallback.filter((place) => fallbackMatches(place, location) && !names.has(place.name.replace(/\s/g, "")));
-    return [...live, ...matchingFallback];
+    return live;
   } catch {
     return [];
   }

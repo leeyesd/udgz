@@ -1,19 +1,23 @@
 "use client";
 
+import { seoulToday, thisWeekend } from "../../lib/visit-calendar";
+import VisitDatePicker from "../VisitDatePicker";
+import { rankPlaces, type VisitMood } from "../../lib/recommendations";
+import { useTopRegions } from "../../lib/use-top-regions";
 import PlaceActions from "../PlaceActions";
 import PlaceTags from "../PlaceTags";
 import PlaceDetails from "../PlaceDetails";
 import { Fragment, useMemo, useState } from "react";
-import { Mood, places } from "../../lib/places";
+import { places } from "../../lib/places";
 import { loadPlaces } from "../../lib/live-places";
 import styles from "./b.module.css";
 
 const ages = [0, 1, 2, 3, 4, 5, 6, 7];
-const moods: { value: Mood; title: string; description: string; icon: string }[] = [
-  { value: "실내", title: "실내", description: "날씨 걱정 없이", icon: "⌂" },
-  { value: "야외", title: "야외", description: "마음껏 움직이기", icon: "☀" },
-  { value: "특별한 체험", title: "특별한 체험", description: "기억에 남는 하루", icon: "✦" },
-  { value: "감성적 휴식", title: "감성적 휴식", description: "부모도 기분 좋게", icon: "♧" },
+const moods: { value: VisitMood; title: string; description: string; icon: string }[] = [
+ {value:"감성적 휴식",title:"감성적 휴식",description:"감도 높은 공간에서 쉬어가기",icon:"♧"},
+ {value:"특별한 체험",title:"특별한 체험",description:"평소와 다른 경험 만나기",icon:"✦"},
+ {value:"신나게 놀기",title:"신나게 놀기",description:"몸을 움직이며 마음껏 놀기",icon:"☀"},
+ {value:"실내 활동",title:"실내 활동",description:"실내 공간만 모아보기",icon:"⌂"},
 ];
 
 function Logo() {
@@ -21,10 +25,11 @@ function Logo() {
 }
 
 export default function VariantB() {
-  const [visitDate, setVisitDate] = useState(() => new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }));
+  const [visitDate, setVisitDate] = useState(() => { const today = seoulToday(); return thisWeekend(today).find(day => day >= today) ?? today; });
+  const topRegions = useTopRegions();
   const [location, setLocation] = useState("");
   const [selectedAges, setSelectedAges] = useState([2]);
-  const [mood, setMood] = useState<Mood>("실내");
+  const [mood, setMood] = useState<VisitMood>("실내 활동");
   const [distance, setDistance] = useState("30분 이내");
   const [results, setResults] = useState(false);
   const [toast, setToast] = useState("");
@@ -32,16 +37,12 @@ export default function VariantB() {
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const canRecommend = Boolean(visitDate) && location.trim().length > 0 && selectedAges.length > 0;
 
-  const recommendations = useMemo(() => [...availablePlaces].sort((a, b) => {
-    const aScore = Object.values(a.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (a.moods.includes(mood) ? 20 : 0);
-    const bScore = Object.values(b.tagScores ?? {}).reduce<number>((n, score) => n + (score ?? 0), 0) + (b.moods.includes(mood) ? 20 : 0);
-    return bScore - aScore;
-  }).slice(0, 3), [mood, availablePlaces]);
+  const recommendations = useMemo(() => rankPlaces(availablePlaces, mood).slice(0, 3), [mood, availablePlaces]);
 
   const recommend = async () => {
     if (!canRecommend) return;
     setLoadingPlaces(true);
-    setAvailablePlaces(await loadPlaces(location));
+    setAvailablePlaces(await loadPlaces(location, visitDate));
     setLoadingPlaces(false);
     setResults(true);
     window.scrollTo({ top: 0 });
@@ -73,8 +74,9 @@ export default function VariantB() {
             <p>{location} 근처 · {selectedAges.map(age => `${age}세`).join(", ")} · {distance}</p>
           </div>
 
-          <div className={styles.resultNotice}><span>i</span><p><b>감도 + 체력빼기 + 경험희소성</b> 상위 3곳을 먼저 보여드려요!</p></div>
+          <div className={styles.resultNotice}><span>i</span><p><b>선택한 활동에 맞는 장소</b>를 먼저 보여드려요!</p></div>
 
+          {recommendations.length === 0 && <p role="status">선택한 지역·날짜·활동에 맞는 장소가 아직 없어요. 조건을 바꿔보세요.</p>}
           <div className={styles.resultGrid}>
             {recommendations.map((place, index) => (
               <Fragment key={place.id}>
@@ -126,7 +128,7 @@ export default function VariantB() {
         <div className={styles.heroCopy}>
           <span className={styles.overline}>직접 엄선하고, 계속 업데이트 중</span>
           <h1>이번 주말의 정답을<br /><strong>30초 안에.</strong></h1>
-          <p>검색은 그만. 지금 우리 가족이 갈 수 있는 곳만 골라 바로 출발하세요.</p>
+          <p>5가지만 답하고, 당장 갈 수 있는 곳<br />고르고 바로 출발하세요!</p>
         </div>
       </section>
 
@@ -145,7 +147,7 @@ export default function VariantB() {
               <span aria-hidden="true">⌖</span>
               <input value={location} onChange={event => setLocation(event.target.value)} placeholder="서울 금천구" autoComplete="address-level2" />
             </label>
-            <div className={styles.quickRow} aria-label="빠른 지역 선택">{["서울", "과천", "의왕", "안양", "수원"].map(city => <button type="button" key={city} className={location === city ? styles.chipSelected : styles.chip} onClick={() => setLocation(city)}>{city}</button>)}</div>
+            <div className={styles.quickRow} aria-label="빠른 지역 선택">{topRegions.map(city => <button type="button" key={city} className={location === city ? styles.chipSelected : styles.chip} onClick={() => setLocation(city)}>{city}</button>)}</div>
           </fieldset>
 
           <fieldset className={styles.fieldset}>
@@ -166,7 +168,7 @@ export default function VariantB() {
             <div className={styles.distanceGrid}>{["30분 이내", "30분 이상"].map(value => <button type="button" key={value} aria-pressed={distance === value} className={distance === value ? styles.distanceSelected : styles.distance} onClick={() => setDistance(value)}><span className={styles.radio} /><b>{value}</b><small>{value === "30분 이내" ? "가볍게 가까운 곳" : "좋다면 멀어도 괜찮아요"}</small></button>)}</div>
           </fieldset>
 
-          <label className="visit-date">방문 날짜<input type="date" value={visitDate} required onChange={e => setVisitDate(e.target.value)} /><small>월~금 평일 · 토·일 주말 요금. 공휴일 요금은 이용 정보를 확인해주세요.</small></label>
+          <fieldset className={styles.fieldset}><legend><span>05</span><b>언제 놀러가세요?</b></legend><VisitDatePicker value={visitDate} onChange={setVisitDate} /></fieldset>
           <button className={styles.mobileSubmit} disabled={!canRecommend || loadingPlaces}>{loadingPlaces ? "장소 불러오는 중…" : "🍆 오디가지? 추천받기"}</button>
         </form>
 
